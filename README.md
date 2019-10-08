@@ -1,5 +1,7 @@
 # sagemaker_mlops_demo
 
+[![CircleCI](https://circleci.com/gh/ababa893/sagemaker_mlops_demo/tree/feature%2Fbasic_api_implementation.svg?style=svg)](https://circleci.com/gh/ababa893/sagemaker_mlops_demo/tree/feature%2Fbasic_api_implementation)
+
 カスタムアルゴリズムによるSageMaker API構築デモコード．
 及び，そのMLOpsコード．
 
