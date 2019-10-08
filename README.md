@@ -17,12 +17,9 @@
         │   │   └── api  # Flaskアプリケーションと関連ファイル（エントリポイント, nginx, wsgi等）
         │   │       ├── apps  # ML処理パイプライン（リソース，前処理，モデル，評価，推論等)
         │   │       │   ├── experiments  # 実験用notebook
-        │   │       │   └── tests
-        │   │       │       └── __init__.py
-        │   │       └── tests
-        │   │           └── __init__.py
-        │   └── tests
-        │       └── __init__.py
+        │   │       │   └── tests/ apps内コード単体テスト
+        │   │       └── tests/ Flask アプリケーションテスト用（結合テスト）
+        │   └── tests/ APIの動作確認用
         └── pyproject.toml  # Poetryのpyproject.tomlで依存関係の管理を行う
 ```
 
