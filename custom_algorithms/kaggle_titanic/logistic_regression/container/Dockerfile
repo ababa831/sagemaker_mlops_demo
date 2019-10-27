@@ -22,4 +22,4 @@ RUN mkdir -p /root/.config/pypoetry/ \
     && poetry install
     # && poetry install --no-dev
 
-CMD ["bash"]
+CMD ["/bin/bash"]
