@@ -1,0 +1,63 @@
+#!/home/.venv/bin/python
+"""
+trainスクリプト
+    SageMakerSDKを経由した学習時のエントリポイント
+    `if __name__ ==  'main':` 以下が学習毎に実行される．
+
+Shebangについて
+    Poetry等の依存関係管理ツールを使う場合は，
+    本番用に作成した仮想環境上のPythonインタプリタをShebangに指定する．
+    （仮想環境は固定パスとして指定できるようにしておく）
+
+Ref: 
+    https://bit.ly/2QeBc9g
+    https://amzn.to/2O0LK9i
+"""
+
+from __future__ import print_function
+
+import os
+from pathlib import Path
+import sys
+import traceback
+import shutil
+
+# TODO: boto3じゃなくてAWS CLI使う予定
+import boto3
+from botocore.client import Config
+from botocore.exceptions import ClientError
+
+# local modules
+# TODO: 追加
+
+
+prefix = '/opt/ml/'
+
+input_path = Path(prefix).joinpath('input/data')
+output_path = str(Path(prefix).joinpath('output'))
+model_path = str(Path(prefix).joinpath('model'))
+
+channel_name = 'training'
+training_path = str(input_path.joinpath(channel_name))
+
+
+class Train(object):
+    """
+    TODO:
+        AWS CLI経由で S3 model DLする仕組みを実装
+            trainスクリプト実行によって学習済みモデルをS3から引っ張ってきて
+            /opt/ml/model以下に配置する
+
+            AWS CLIを利用してシンプルに記述したい
+    """
+    def __init__(self):
+        raise NotImplementedError
+
+    def train(self):
+        raise NotImplementedError
+
+
+if __name__ == '__main__':
+    train = Train()
+    train.train()
+    sys.exit(0)
