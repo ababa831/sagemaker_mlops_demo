@@ -1,4 +1,4 @@
-#!/home/.venv/bin/python
+#!/usr/bin/env python
 """
 serveスクリプト
     推論時のエントリポイント
@@ -6,8 +6,8 @@ serveスクリプト
 
 Shebangについて
     Poetry等の依存関係管理ツールを使う場合は，
-    本番用に作成した仮想環境上のPythonインタプリタをShebangに指定する．
-    （仮想環境は固定パスとして指定できるようにしておく）
+    本番用に作成した（仮想）環境上のPythonインタプリタをShebangに指定する．
+    （仮想環境を構築した場合は固定パスとして指定できるようにしておく）
 
 Ref: https://bit.ly/33IHl1d
 """
