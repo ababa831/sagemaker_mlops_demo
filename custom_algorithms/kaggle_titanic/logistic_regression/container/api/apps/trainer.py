@@ -9,7 +9,7 @@ from trains import Task
 import pandas as pd
 
 from exceptions import InvalidColumnsError
-# from preprocessing import PreProcessor
+from preprocessing import PreProcessor
 
 repo_abspath = Path(__file__).resolve().parents[6]
 repo = Repo(repo_abspath)
@@ -71,16 +71,16 @@ def load_train_data(input_path):
 
 if __name__ == "__main__":
     args = parse_arg()
-    # print(args)
+
     task = Task.init(project_name=args.project_name,
                      task_name=args.task_name,
                      output_uri=args.output_uri)
+    
     train_df = load_train_data(args.input_uri)
-
-    # pp = PreProcessor(label='Survived')  # transformerはselfのfieldとしてもたせる
-    # train_dataset = pp.get_dataset(train_df)  # labelがなけりゃ学習データと判断させればよい
-    # datasetの形式: {'X', 'y', 'なんらかのtransformer_dict: {'path', 'object自体'}'}
-
+    
+    pp = PreProcessor(label='Survived')
+    train_dataset = pp.get_dataset(train_df)
+    
     # m = Model()
     # m.cross_validate(dataset)  # モデル保存もする
 
