@@ -30,3 +30,4 @@ workflows:
                 - /feature.*/
                 # - master
                 # - /test-env.*/
+                # - /stg-env.*/s
