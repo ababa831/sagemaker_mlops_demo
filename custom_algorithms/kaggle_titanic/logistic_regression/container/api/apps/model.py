@@ -26,9 +26,10 @@ class Model(object):
         except KeyError as e:
             # self.hyper_parametersのkeyに想定したものが存在しない場合
             print('KeyError: ', e)
+            print('LogisticRegressoionのデフォルトパラメータ値を代替として設定．')
             clf = LogisticRegression()
         finally:
-            print('LogisticRegressoionのデフォルトパラメータ値を代替として設定．')
+            
             return clf
 
     def load_model(self, parameter_list, config_path):
