@@ -29,7 +29,6 @@ class Model(object):
             print('LogisticRegressoionのデフォルトパラメータ値を代替として設定．')
             clf = LogisticRegression()
         finally:
-            
             return clf
 
     def load_model(self, parameter_list, config_path):
