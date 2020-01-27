@@ -2,7 +2,7 @@
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
-import traceback
+# import traceback
 
 from git import Repo
 from trains import Task
@@ -10,6 +10,7 @@ import pandas as pd
 
 from exceptions import InvalidColumnsError
 from preprocessing import PreProcessor
+from model import Model
 
 repo_abspath = Path(__file__).resolve().parents[6]
 repo = Repo(repo_abspath)
@@ -18,7 +19,8 @@ repo = Repo(repo_abspath)
 def parse_arg():
     parser = ArgumentParser()
 
-    parser.add_argument('input_uri', type=str)
+    parser.add_argument('input_path', type=str)
+    parser.add_argument('config_path', type=str)
     parser.add_argument('-p',
                         '--project_name',
                         type=str,
@@ -60,10 +62,10 @@ def load_train_data(input_path):
         train_df = pd.read_csv(input_path)
         _validate_train_data(train_df)
     except IOError:
-        traceback.print_exc()
+        # traceback.print_exc()
         sys.exit('\n入力した学習データは無効であるため終了')
     except InvalidColumnsError:
-        traceback.print_exc()
+        # traceback.print_exc()
         sys.exit('Titanicコンペで使用される学習データでないため終了')
     else:
         return train_df
@@ -75,14 +77,17 @@ if __name__ == "__main__":
     task = Task.init(project_name=args.project_name,
                      task_name=args.task_name,
                      output_uri=args.output_uri)
-    
-    train_df = load_train_data(args.input_uri)
-    
-    pp = PreProcessor(label='Survived')
+
+    train_df = load_train_data(args.input_path)
+
+    pp = PreProcessor(config_path='/path/to/config',
+                      mode='train',
+                      label='Survived')
     train_dataset = pp.get_dataset(train_df)
-    
-    # m = Model()
-    # m.cross_validate(dataset)  # モデル保存もする
+
+    m = Model(config_path='/path/to/config', mode='train')
+    m.init_model()
+    m.train_with_cv(dataset)  # モデル保存もする
 
     # ログ生成あれこれ (Trainsのloggingをうまく使う)
 
