@@ -92,15 +92,6 @@ class PreProcessor(object):
         self.cm.save_config(self.config, self.config_path)
         print(f'モデル保存先を設定ファイル{self.config_path}に上書き')
 
-    def _validate_dict(self, dict_obj, expected_keys):
-        """
-        TODO: 他のmoduleでも利用しているので，Utilsクラスにまとめる
-        """
-        for exp_key in expected_keys:
-            if exp_key not in dict_obj.keys():
-                errmsg = f'{exp_key}が設定ファイルに含まれてない．'
-                raise KeyError(errmsg)
-
     def get_dataset(self, input_df):
         # 入力データのチェック
         if isinstance(input_df, pd.core.frame.DataFrame):
