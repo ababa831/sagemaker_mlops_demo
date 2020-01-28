@@ -1,6 +1,3 @@
-import json
-
-
 class Utils(object):
     @classmethod
     def validate_dict(cls, dict_obj, expected_keys):
