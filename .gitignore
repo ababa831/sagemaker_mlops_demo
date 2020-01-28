@@ -112,3 +112,7 @@ poetry.lock
 # VSCode
 .vscode/
 .devcontainer/
+
+# Model Artifacts
+*.pkl
+*.pkl.cmp
