@@ -1,10 +1,15 @@
 import warnings
-import json
+from pathlib import Path
+import os
 
 import pandas as pd
 import numpy as np
 from sklearn.externals import joblib
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
+from git import Repo
+
+from utils import Utils
+from config_manager import ConfigManager
 
 warnings.filterwarnings('ignore')
 
@@ -15,10 +20,13 @@ class PreProcessor(object):
         self.config_path = config_path  # 学習時の設定ファイル
         self.dataset = {'X': None, 'y': None}
 
-        assert mode in ['train', 'pred']
+        if mode not in ['train', 'pred']:
+            raise ValueError('modeに"train", "pred"を指定してない．')
         self.mode = mode
         if mode == 'pred':
-            self.config = self._load_config(config_path)
+            cm = ConfigManager()
+            expected_keys = ['transformer_paths']
+            self.config = cm.load_config(config_path, expected_keys)
             self.transformers = self._load_transformers(self.config)
         else:
             self.transformers = {
@@ -36,26 +44,53 @@ class PreProcessor(object):
             'fillna_vals', 'onehot_encoders', 'count_corresp_tables',
             'minmax_scaler'
         ]
-        self._validate_dict(transformers, expected_keys)
+        Utils.validate_dict(transformers, expected_keys)
 
         return transformers
 
-    def _load_config(self, config_path):
-        """
-        TODO: 他のmoduleでも利用しているので，Utilsクラスにまとめる
-        """
-        with open(config_path, encoding='utf-8') as f:
-            config = json.load(f)
+    def save_transformers(self,
+                          dst_dir='./.models',
+                          child_dir=None,
+                          transformers_name='transformers.pkl.cmp'):
+        """前処理・特徴量エンジニアリング用モデル等を保存．
+        これらは一括して，dictオブジェクトにまとめられ，joblib.dumpされた
+        単一ファイルを想定．
 
-        # 想定する例外
-        if not isinstance(config, dict):
-            errmsg = f'設定ファイルが{type(config)}型となっている．' \
-                + 'dictでなければならない．'
-            raise TypeError(errmsg)
-        expected_keys = ['transformer_paths']
-        self._validate_dict(config, expected_keys)
+        Parameters
+        ----------
+        dst_dir : str, optional
+            保存先の親ディレクトリ, by default './.models'
+        child_dir : str, optional
+            保存先の子ディレクトリ．実験タスク等の中間名, by default None
+        transformers_name : str, optional
+            前処理・特徴量エンジニアリング用モデルの保存名
+            , by default 'transformers.pkl.cmp'
 
-        return config
+        TODO
+        ----
+        model.pyのsave_modelメソッドと被る部分が多いのでまとめるか検討
+        """
+        if not self.transformers:
+            print('モデルが学習またはロードされていないので保存しない')
+            return
+
+        dst_dir = Path(dst_dir).resolve()
+        if child_dir is None:
+            # '{acitve branchのHEAD commit ID}.pkl.cmp'のように表示
+            repo_abspath = Path(__file__).resolve().parents[6]
+            repo = Repo(repo_abspath)
+            child_dir = repo.active_branch.commit.hexsha
+        dst_path = dst_dir.joinpath([child_dir, transformers_name])
+
+        if not dst_path.parent.exists():
+            os.makedirs(dst_path.parent)
+
+        joblib.dump(self.transformers, dst_path, compress=True)
+        print(dst_path, 'に前処理・特徴量エンジニアリング用モデル等を保存')
+
+        self.config['transformer_paths'] = dst_path
+        self.cm.save_config(self.config, self.config_path)
+        print(f'モデル保存先を設定ファイル{self.config_path}に上書き')
 
     def _validate_dict(self, dict_obj, expected_keys):
         """

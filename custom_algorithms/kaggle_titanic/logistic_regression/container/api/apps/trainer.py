@@ -5,12 +5,13 @@ import sys
 # import traceback
 
 from git import Repo
-from trains import Task
+# from trains import Task
 import pandas as pd
 
 from exceptions import InvalidColumnsError
 from preprocessing import PreProcessor
 from model import Model
+from config_manager import ConfigManager
 
 repo_abspath = Path(__file__).resolve().parents[6]
 repo = Repo(repo_abspath)
@@ -73,22 +74,30 @@ def load_train_data(input_path):
 
 if __name__ == "__main__":
     args = parse_arg()
-
+    """
     task = Task.init(project_name=args.project_name,
                      task_name=args.task_name,
                      output_uri=args.output_uri)
+    """
+
+    cm = ConfigManager()
+    cm.create_config(args.config_path)
 
     train_df = load_train_data(args.input_path)
 
-    pp = PreProcessor(config_path='/path/to/config',
+    pp = PreProcessor(config_path=args.config_path,
                       mode='train',
                       label='Survived')
     train_dataset = pp.get_dataset(train_df)
+    child_dir = f'{args.project_name}_{args.task_name}'
+    pp.save_transformers(child_dir=child_dir,
+                         transformers_name='sample_transformers.pkl.cmp')
 
-    m = Model(config_path='/path/to/config', mode='train')
+    m = Model(config_path=args.config_path, mode='train')
     m.init_model()
-    m.train_with_cv(dataset)  # モデル保存もする
-
-    # ログ生成あれこれ (Trainsのloggingをうまく使う)
+    m.train_with_cv(train_dataset)
+    m.save_model(child_dir=child_dir, model_name='sample_model.pkl.cmp')
 
     # Upload to s3
+    # TODO: S3とローカルのデータ橋渡し用モジュールの作成と，それを利用したコードの記述
+    # e.g. s3_updown.py
