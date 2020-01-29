@@ -2,15 +2,21 @@ import os
 from pathlib import Path
 import platform
 import json
+import sys
+from pip._internal.operations import freeze
+
+from git import Repo
 
 from utils import Utils
 
 
 class ConfigManager(object):
+    def __init__(self):
+        repo_abspath = Path(__file__).resolve().parents[6]
+        self.repo = Repo(repo_abspath)
+
     def create_config(self, dst_path):
         """trainer用の設定を新規作成する．
-        基本的に，trainer.pyの設定を変えたい場合は本メソッドの
-        config内を設定する．
         
         パス・URI等はここで設定する必要はない．
         trainer.pyで指定した引数に応じてあとで
@@ -22,7 +28,7 @@ class ConfigManager(object):
             設定ファイルの出力先パス
         """
         config = {
-            'config_path': Path(dst_path).resolve(),
+            'config_path': Path(dst_path).resolve(),  # training時のみ使用
             'hyper_params': {
                 'random_state': 0,
                 'solver': 'lbfgs',
@@ -30,9 +36,37 @@ class ConfigManager(object):
                 'n_jobs': -1,
                 'cv': 5,
                 'return_train_score': True
+            },
+            'python': {
+                'interpreter': sys.executable,
+                'version': platform.python_version(),
+                'packages': list(freeze.freeze())
+            },
+            'repository': {
+                'active_branch': self.repo.active_branch.name,
+                'commit_version': self.repo.active_branch.commit.hexsha
             }
         }
         self.save_config(config, dst_path)
+
+    def remove_info(self, config_path, target_keys):
+        with open(config_path, encoding='utf-8') as f:
+            config = json.load(f)
+
+        for k in target_keys:
+            if k in config:
+                config.pop(k)
+
+        self.save_config(config, config_path)
+
+    def add_info(self, config_path, target_dict):
+        with open(config_path, encoding='utf-8') as f:
+            config = json.load(f)
+
+        for k, v in target_dict.items():
+            config[k] = v
+
+        self.save_config(config, config_path)
 
     def save_config(self, config, config_path):
         with open(config_path, 'w') as f:

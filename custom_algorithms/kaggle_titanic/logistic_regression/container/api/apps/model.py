@@ -93,13 +93,12 @@ class Model(object):
                 self.config['hyper_params']['return_train_score']
 
         # 学習（公差検証）
-        scores = cross_validate(
-            self.clf,
-            dataset['X'],
-            dataset['y'],
-            cv=cv,
-            return_train_score=return_train_score,
-            return_estimator=True)
+        scores = cross_validate(self.clf,
+                                dataset['X'],
+                                dataset['y'],
+                                cv=cv,
+                                return_train_score=return_train_score,
+                                return_estimator=True)
         """
         今回は，簡単のためCV中最も良いvalidationスコアが出たものを採用する．
         このあたりはタスクによって手法を適宜変えれば良い (e.g. 平均をとる)
@@ -111,10 +110,11 @@ class Model(object):
                    dst_dir='./.models',
                    child_dir=None,
                    model_name='logistic_regression.pkl.cmp'):
+        self.dst_dir = dst_dir
         if not self.clf:
             print('モデルが学習またはロードされていないので保存しない')
             return
-
+        
         dst_dir = Path(dst_dir).resolve()
         if child_dir is None:
             # '{acitve branchのHEAD commit ID}.pkl.cmp'のように表示
@@ -129,12 +129,19 @@ class Model(object):
         joblib.dump(self.clf, dst_path, compress=True)
         print(dst_path, 'にモデルを保存')
 
-        self.config['model_path'] = dst_path
+        # 子ディレクトリ以下のパスを記録（推論時に使用）
+        self.config['model_path'] = \
+            Path(child_dir).joinpath(model_name)
         self.cm.save_config(self.config, self.config_path)
-        print(f'モデル保存先を設定ファイル{self.config_path}に上書き')
+        print(f'モデル保存先を設定ファイル{self.config_path}を更新')
 
     def predict(self, dataset):
+        prefix = '/opt/ml/model'
+        model_path_for_pred = Path(prefix).joinpath(self.config['model_path'])
+
         self._validate_dataset(dataset)
-        self.clf = joblib.load(self.config['model_path'])
+
+        self.clf = joblib.load(model_path_for_pred)
         dataset['y'] = self.clf.predict(dataset['X'])
+
         return dataset

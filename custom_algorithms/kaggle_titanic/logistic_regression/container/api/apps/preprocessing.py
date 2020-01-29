@@ -39,7 +39,11 @@ class PreProcessor(object):
     def _load_transformers(self, config):
         """保存したログからtransformers 辞書を取得
         """
-        transformers = joblib.load(config['transformer_paths'])
+        prefix = '/opt/ml/model'
+        trans_path_for_pred = \
+            Path(prefix).joinpath(config['transformer_paths'])
+
+        transformers = joblib.load(trans_path_for_pred)
         expected_keys = [
             'fillna_vals', 'onehot_encoders', 'count_corresp_tables',
             'minmax_scaler'
@@ -88,7 +92,9 @@ class PreProcessor(object):
         joblib.dump(self.transformers, dst_path, compress=True)
         print(dst_path, 'に前処理・特徴量エンジニアリング用モデル等を保存')
 
-        self.config['transformer_paths'] = dst_path
+        # 子ディレクトリ以下のパスを記録（推論時に使用）
+        self.config['transformer_paths'] = \
+            Path(child_dir).joinpath(transformers_name)
         self.cm.save_config(self.config, self.config_path)
         print(f'モデル保存先を設定ファイル{self.config_path}に上書き')
 
