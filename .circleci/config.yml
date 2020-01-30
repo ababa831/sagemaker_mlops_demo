@@ -3,7 +3,9 @@ version: 2.1
 executors:
   dev_executor:
     docker:
-      - image: python:3.6
+      # サンプル故に，便宜上docker hubに"公開"したものをbase imageとした．
+      # 基本的には，ECRやdocker hubのprivateで使用することを想定
+      - image: ababa893/mlops_env_sample_ml_base:latest
   
 jobs:
   initial_job:
