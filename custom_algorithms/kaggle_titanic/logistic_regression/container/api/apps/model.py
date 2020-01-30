@@ -2,9 +2,9 @@ import traceback
 import sys
 from pathlib import Path
 import os
+import joblib
 
 import numpy as np
-from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_validate
 from git import Repo
@@ -22,10 +22,11 @@ class Model(object):
         if mode not in ['train', 'pred']:
             raise ValueError('modeに"train", "pred"を指定してない．')
         self.mode = mode
+        expected_keys = []
         if mode == 'pred':
             expected_keys = ['model_path', 'hyper_params']
-            self.config = \
-                self.cm.load_config(config_path, expected_keys)
+        self.config = \
+            self.cm.load_config(config_path, expected_keys)
 
     def _validate_dataset(self, dataset):
         if not isinstance(dataset, dict):
@@ -47,16 +48,21 @@ class Model(object):
         # ハイパーパラメータ辞書の検証
         try:
             if not isinstance(hyper_parameters, dict):
-                raise KeyError(f'{hyper_parameters}がdictでない．')
+                raise TypeError(f'{hyper_parameters}がdictでない．')
             expected_keys = [
                 'random_state', 'solver', 'class_weight', 'n_jobs'
             ]
             Utils.validate_dict(hyper_parameters, expected_keys)
-        except KeyError:
+            isinstance(hyper_parameters['random_state'], int)
+            isinstance(hyper_parameters['solver'], str)
+            isinstance(hyper_parameters['class_weight'], str)
+            isinstance(hyper_parameters['n_jobs'], int)
+        except (TypeError, KeyError):
             """
             configに'hyper_params'キーとそのvaluesにexpected_keys
             が存在しない場合
             """
+            traceback.print_exc()
             hyper_parameters = {
                 'random_state': 0,
                 'solver': 'lbfgs',
@@ -65,19 +71,13 @@ class Model(object):
             }
 
         # モデルの初期化
-        try:
-            self.clf = LogisticRegression(
-                random_state=hyper_parameters['random_state'],
-                solver=hyper_parameters['solver'],
-                class_weight=hyper_parameters['class_weight'],
-                n_jobs=hyper_parameters['n_jobs'])
-        except (ValueError, TypeError):
-            errmsg = 'hyper_parametersのvaluesが' \
-                + 'LogisticRegressionの想定した値・型でない場合'
-            traceback.print_exc()
-            sys.exit(errmsg)
+        self.clf = LogisticRegression(
+            random_state=hyper_parameters['random_state'],
+            solver=hyper_parameters['solver'],
+            class_weight=hyper_parameters['class_weight'],
+            n_jobs=hyper_parameters['n_jobs'])
 
-    def train_with_cv(self, dataset, cv=5, return_train_score=True):
+    def train_with_cv(self, dataset, cv=4, return_train_score=True):
         # 使用オブジェクトの検証
         self._validate_dataset(dataset)
         if self.clf is None:
@@ -93,18 +93,18 @@ class Model(object):
                 self.config['hyper_params']['return_train_score']
 
         # 学習（公差検証）
-        scores = cross_validate(self.clf,
-                                dataset['X'],
-                                dataset['y'],
-                                cv=cv,
-                                return_train_score=return_train_score,
-                                return_estimator=True)
+        self.scores = cross_validate(self.clf,
+                                     dataset['X'],
+                                     dataset['y'],
+                                     cv=cv,
+                                     return_train_score=return_train_score,
+                                     return_estimator=True)
         """
         今回は，簡単のためCV中最も良いvalidationスコアが出たものを採用する．
         このあたりはタスクによって手法を適宜変えれば良い (e.g. 平均をとる)
         """
-        best_idx = scores['test_score'].argmax()
-        self.clf = scores['estimator'][best_idx]
+        best_idx = self.scores['test_score'].argmax()
+        self.clf = self.scores['estimator'][best_idx]
 
     def save_model(self,
                    dst_dir='./.models',
@@ -114,14 +114,14 @@ class Model(object):
         if not self.clf:
             print('モデルが学習またはロードされていないので保存しない')
             return
-        
+
         dst_dir = Path(dst_dir).resolve()
         if child_dir is None:
             # '{acitve branchのHEAD commit ID}.pkl.cmp'のように表示
             repo_abspath = Path(__file__).resolve().parents[6]
             repo = Repo(repo_abspath)
             child_dir = repo.active_branch.commit.hexsha
-        dst_path = dst_dir.joinpath([child_dir, model_name])
+        dst_path = dst_dir.joinpath(child_dir, model_name)
 
         if not dst_path.parent.exists():
             os.makedirs(dst_path.parent)

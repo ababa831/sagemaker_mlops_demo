@@ -115,7 +115,7 @@ if __name__ == "__main__":
     }
     cm.add_info(args.config_path, newinfo)
     # 2. S3のUploadソースにconfigと学習データをコピー
-    s3_src_dir_w_child = str(Path(m.dst_dir).joinpath(child_dir))
+    s3_src_dir_w_child = str(Path(model_dir).joinpath(child_dir))
     shutil.copy(args.config_path, s3_src_dir_w_child)
     shutil.copy(args.input_path, s3_src_dir_w_child)
 

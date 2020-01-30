@@ -1,0 +1,13 @@
+{
+    "config_path": "/opt/program/workspace/custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/tests/data/config_valid.json",
+    "hyper_params": {
+        "random_state": 0,
+        "solver": "lbfgs",
+        "class_weight": "balanced",
+        "n_jobs": -1,
+        "cv": 5,
+        "return_train_score": true
+    },
+    "transformer_paths": "/opt/ml/model/dummy_transformers",
+    "model_path": "/opt/ml/model/dummy_model.pkl.cmp"
+}

@@ -1,9 +1,9 @@
 import os
-from pathlib import Path
+from pathlib import Path, PosixPath
 import platform
 import json
 import sys
-from pip._internal.operations import freeze
+import subprocess
 
 from git import Repo
 
@@ -27,6 +27,8 @@ class ConfigManager(object):
         dst_path : str
             設定ファイルの出力先パス
         """
+        pip_freezed = subprocess.run(['pip', 'freeze'], stdout=subprocess.PIPE)
+        packages = pip_freezed.stdout.decode('utf-8').split()
         config = {
             'config_path': Path(dst_path).resolve(),  # training時のみ使用
             'hyper_params': {
@@ -40,7 +42,7 @@ class ConfigManager(object):
             'python': {
                 'interpreter': sys.executable,
                 'version': platform.python_version(),
-                'packages': list(freeze.freeze())
+                'packages': packages
             },
             'repository': {
                 'active_branch': self.repo.active_branch.name,
@@ -69,8 +71,21 @@ class ConfigManager(object):
         self.save_config(config, config_path)
 
     def save_config(self, config, config_path):
-        with open(config_path, 'w') as f:
-            json.dump(config, f, ensure_ascii=False, encoding='utf8', indent=4)
+        config = self._posixpath2str(config)
+        with open(config_path, 'w', encoding='utf8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=4)
+
+    def _posixpath2str(self, target_dict):
+        if not isinstance(target_dict, dict):
+            raise TypeError('入力データが辞書型でない')
+        for k, v in target_dict.items():
+            if isinstance(v, dict):
+                target_dict[k] = self._posixpath2str(v)
+            if isinstance(v, list):
+                target_dict[k] = [self._posixpath2str(v_val) for v_val in v]
+            elif isinstance(v, PosixPath):
+                target_dict[k] = str(v)
+        return target_dict
 
     def load_config(self, config_path, expected_keys):
         with open(config_path, encoding='utf-8') as f:

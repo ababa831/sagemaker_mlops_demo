@@ -1,10 +1,10 @@
 import warnings
 from pathlib import Path
 import os
+import joblib
 
 import pandas as pd
 import numpy as np
-from sklearn.externals import joblib
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from git import Repo
 
@@ -84,10 +84,9 @@ class PreProcessor(object):
             repo_abspath = Path(__file__).resolve().parents[6]
             repo = Repo(repo_abspath)
             child_dir = repo.active_branch.commit.hexsha
-        dst_path = dst_dir.joinpath([child_dir, transformers_name])
+        dst_path = dst_dir.joinpath(child_dir, transformers_name)
 
-        if not dst_path.parent.exists():
-            os.makedirs(dst_path.parent)
+        os.makedirs(dst_path.parent, exist_ok=True)
 
         joblib.dump(self.transformers, dst_path, compress=True)
         print(dst_path, 'に前処理・特徴量エンジニアリング用モデル等を保存')
@@ -95,18 +94,14 @@ class PreProcessor(object):
         # 子ディレクトリ以下のパスを記録（推論時に使用）
         self.config['transformer_paths'] = \
             Path(child_dir).joinpath(transformers_name)
-        self.cm.save_config(self.config, self.config_path)
+        cm = ConfigManager()
+        cm.save_config(self.config, self.config_path)
         print(f'モデル保存先を設定ファイル{self.config_path}に上書き')
 
     def get_dataset(self, input_df):
         # 入力データのチェック
-        if isinstance(input_df, pd.core.frame.DataFrame):
+        if not isinstance(input_df, pd.core.frame.DataFrame):
             raise TypeError('入力データはDataFrame型のみ有効')
-
-        # 学習用データでなければ（推論データであれば），学習時のmodelオブジェクトをロード
-        self.is_train_set = self.label in input_df.columns
-        if not self.is_train_set:
-            self._load_transformers()
 
         # 特徴量エンジニアリング
         input_df = self.do_feature_engineering(input_df)
@@ -116,8 +111,11 @@ class PreProcessor(object):
             'Cabin_count', 'Fare', 'Pclass', 'Sex_female', 'Sex_male',
             'Embarked_C', 'Embarked_NA', 'Embarked_Q', 'Embarked_S'
         ]
+        cols_explanatory = \
+            [col for col in cols_explanatory if col in input_df.columns]
         self.dataset['X'] = input_df[cols_explanatory].values
-        self.dataset['y'] = input_df[self.label] if self.is_train_set else None
+        self.dataset['y'] = \
+            input_df[self.label].values if self.mode == 'train' else None
 
         return self.dataset
 
@@ -127,7 +125,7 @@ class PreProcessor(object):
         cols_quantitative = ['Age', 'SibSp', 'Parch', 'Fare']
         for col in cols_quantitative:
             fillna_val = None
-            if self.is_train_set:
+            if self.mode == 'train':
                 fillna_val = input_df[col].median()  # To median
                 # 後で推論データの前処理に適用するので，dataset辞書に記録
                 self.transformers['fillna_vals'][col] = \
@@ -144,8 +142,8 @@ class PreProcessor(object):
         cols_categ = ['Sex', 'Embarked']
         ohe = OneHotEncoder(handle_unknown="ignore", sparse=False)
         for col in cols_categ:
-            if not self.is_train_set:
-                ohe = self.transformers['onehot_encoder'][col]
+            if self.mode == 'pred':
+                ohe = self.transformers['onehot_encoders'][col]
 
             # Encoding(ユニーク数分DataFrameにカラムを用意）
             uq = [f'{col}_{uq_val}' for uq_val in input_df[col].unique()]
@@ -159,14 +157,14 @@ class PreProcessor(object):
             # 更新
             input_df = pd.concat([input_df, ohe_df], axis=1)
 
-            if self.is_train_set:
+            if self.mode == 'train':
                 self.transformers['onehot_encoders'][col] = ohe
 
         # カウント変数の作成
         cols_to_count = ['Ticket', 'Cabin']
         for col in cols_to_count:
             tmp_counts = None
-            if self.is_train_set:
+            if self.mode == 'train':
                 tmp_counts = input_df[col].value_counts().reset_index()
                 tmp_counts.columns = [col, f'{col}_count']
                 self.transformers['count_corresp_tables'][col] = tmp_counts
@@ -177,7 +175,8 @@ class PreProcessor(object):
 
         # 裾が重い変数を対数変換
         errmsg = 'Cabin_countが入力データに存在していない'
-        assert 'Cabin_count' in input_df.columns, errmsg
+        if 'Cabin_count' not in input_df.columns:
+            raise ValueError(errmsg)
         cols_to_log1p = ['Fare', 'Cabin_count']
         for col in cols_to_log1p:
             input_df[col] = input_df[col].apply(np.log1p)
@@ -186,9 +185,8 @@ class PreProcessor(object):
         counts = [f'{col}_count' for col in cols_to_count]
         cols_quantitative += counts
         scaler = MinMaxScaler()
-        if self.is_train_set:
-            input_df[cols_quantitative] = scaler.fit(
-                input_df[cols_quantitative])
+        if self.mode == 'train':
+            scaler.fit(input_df[cols_quantitative])
             self.transformers['minmax_scaler'] = scaler
         else:
             scaler = self.transformers['minmax_scaler']
