@@ -19,12 +19,13 @@ jobs:
           command: date
   unittests_kaggle_logistic:
     executor: dev_executor
-    working_directory: ~/sagemaker_mlops_demo/custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
+    working_directory: ~/sagemaker_mlops_demo/
     steps:
       - checkout
       - run:
           name: unittest
           command: |
+            cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
             pip install pytest
             pytest -vv -s tests/
 
