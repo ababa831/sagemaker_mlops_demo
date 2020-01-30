@@ -116,3 +116,7 @@ poetry.lock
 # Model Artifacts
 *.pkl
 *.pkl.cmp
+
+# 例外
+!*valid*.csv
+!*dummy*
