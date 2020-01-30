@@ -3,7 +3,7 @@ version: 2.1
 executors:
   dev_executor:
     docker:
-      - image: debian:stretch
+      - image: python:3.6
   
 jobs:
   initial_job:
@@ -25,6 +25,7 @@ jobs:
       - run:
           name: unittest
           command: |
+            pip install pytest
             pytest -vv -s tests/
 
 workflows:
