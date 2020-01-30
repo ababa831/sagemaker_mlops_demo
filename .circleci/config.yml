@@ -28,7 +28,7 @@ jobs:
           name: unittest
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
-            pip install pytest
+            poetry add gitpython
             pytest -vv -s tests/
 
 workflows:
