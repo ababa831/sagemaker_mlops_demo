@@ -25,10 +25,14 @@ jobs:
     steps:
       - checkout
       - run:
+          name: add gitpython package
+          command: |
+            cd /opt/program
+            poetry add gitpython
+      - run:
           name: unittest
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
-            poetry add gitpython
             pytest -vv -s tests/
 
 workflows:
