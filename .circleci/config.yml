@@ -17,7 +17,15 @@ jobs:
       - run:
           name: Print the Current Time
           command: date
-
+  unittests_kaggle_logistic:
+    executor: dev_executor
+    working_directory: ~/sagemaker_mlops_demo/custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
+    steps:
+      - checkout
+      - run:
+          name: unittest
+          command: |
+            pytest -vv -s tests/
 
 workflows:
   dev_build_and_deploy_and_test_api:
@@ -30,4 +38,15 @@ workflows:
                 - /feature.*/
                 # - master
                 # - /test-env.*/
-                # - /stg-env.*/s
+                # - /stg-env.*/
+      - unittests_kaggle_logistic:
+          # context: sagemaker-dev-aws-key
+          requires:
+            - initial_job
+          filters:
+            branches:
+              only:
+                - /feature.*/
+                # - master
+                # - /test-env.*/
+                # - /stg-env.*/
