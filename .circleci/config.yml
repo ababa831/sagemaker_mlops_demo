@@ -34,8 +34,11 @@ jobs:
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
             pytest -vv -s --junitxml=test-reports/junit.xml --cov-report=html:test-reports tests/
-      - store-test-results:
+      - store_test_results:
           path: custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/test-reports
+      - store_artifacts:
+          path: custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/test-reports
+          destination: test-reports
 
 workflows:
   dev_build_and_deploy_and_test_api:
