@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/ababa893/sagemaker_mlops_demo.svg?style=shield&circle-token=0d5d72b4d4ef1239eed11095d61922cbf81d305c)](https://circleci.com/gh/ababa893/sagemaker_mlops_demo)
 [![Coverage Status](https://coveralls.io/repos/github/ababa893/sagemaker_mlops_demo/badge.svg?branch=feature/basic_api_implementation&t=blIEmn)](https://coveralls.io/github/ababa893/sagemaker_mlops_demo?branch=feature/basic_api_implementation) 
-[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
+[![Python 3.6](https://img.shields.io/badge/python-3.6.9-blue.svg)](https://www.python.org/downloads/release/python-369/)
 
 
 カスタムアルゴリズムによるSageMaker API構築デモコード．
