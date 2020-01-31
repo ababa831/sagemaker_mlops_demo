@@ -33,7 +33,7 @@ jobs:
           name: unittest
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
-            pytest -vv -s --junitxml=test-reports/junit.xml --cov-report=html:test-reports tests/
+            pytest -vv -s --junitxml=test-reports/junit.xml --cov=tests --cov-report=html:test-reports tests/
       - store_test_results:
           path: custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/test-reports
       - store_artifacts:
