@@ -3,10 +3,9 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 import shutil
-# import traceback
+import traceback
 
 from git import Repo
-# from trains import Task
 import pandas as pd
 
 from exceptions import InvalidColumnsError
@@ -15,7 +14,8 @@ from model import Model
 from config_manager import ConfigManager
 from s3_updown import S3UpDown
 
-repo_abspath = Path(__file__).resolve().parents[6]
+repo_root = 6
+repo_abspath = Path(__file__).resolve().parents[repo_root]
 repo = Repo(repo_abspath)
 
 
@@ -65,11 +65,14 @@ def load_train_data(input_path):
         train_df = pd.read_csv(input_path)
         _validate_train_data(train_df)
     except IOError:
-        # traceback.print_exc()
+        traceback.print_exc()
         sys.exit('\n入力した学習データは無効であるため終了')
     except InvalidColumnsError:
-        # traceback.print_exc()
+        traceback.print_exc()
         sys.exit('Titanicコンペで使用される学習データでないため終了')
+    except UnicodeDecodeError:
+        traceback.print_exc()
+        sys.exit('csv, tsv形式でないファイルを読み込もうとしたので終了')
     else:
         return train_df
 

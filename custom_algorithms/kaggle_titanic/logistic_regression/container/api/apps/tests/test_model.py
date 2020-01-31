@@ -1,9 +1,13 @@
 from pathlib import Path
 import shutil
 from copy import deepcopy
+import sys
 
 import pytest
 import numpy as np
+
+sd = Path(__file__).parents[1].resolve()
+sys.path.append(sd)
 
 
 class TestModel(object):

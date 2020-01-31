@@ -31,8 +31,8 @@ class DummyObjects(object):
         shutil.copyfile(src_transfromers, self.dummy_transformes_path)
 
     def create_valid_dummy_df(self):
-        data_path = self.data_dir.joinpath('data_valid.csv')
-        self.dummy_valid_df = pd.read_csv(data_path)
+        self.data_path = self.data_dir.joinpath('data_valid.csv')
+        self.dummy_valid_df = pd.read_csv(self.data_path)
 
     def create_invalid_dummy_df(self):
         cols = self.dummy_valid_df.columns

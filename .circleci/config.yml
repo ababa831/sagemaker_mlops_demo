@@ -28,12 +28,14 @@ jobs:
           name: add gitpython package
           command: |
             cd /opt/program
-            poetry add gitpython
+            poetry add gitpython pytest-cov
       - run:
           name: unittest
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
-            pytest -vv -s tests/
+            pytest -vv -s --junitxml=test-reports/junit.xml --cov-report=html:test-reports tests/
+      - store-test-results:
+          path: custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/test-reports
 
 workflows:
   dev_build_and_deploy_and_test_api:
