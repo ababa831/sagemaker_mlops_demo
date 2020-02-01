@@ -35,7 +35,7 @@ def parse_arg():
                         type=str,
                         default=active_branch.commit.hexsha)
     parser.add_argument('-P', '--profile', type=str, default='dev')
-    parser.add_argument('-o', '--output_s3bucket', type=str, default='sample')
+    parser.add_argument('-o', '--output_s3bucket', type=str, default='sample-titanic-logistic-regression')
 
     args = parser.parse_args()
 
