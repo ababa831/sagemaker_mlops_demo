@@ -41,7 +41,8 @@ class S3UpDown(object):
 
         # S3 Upload
         command = ['aws', 's3', 'cp', srcpath, final_dstpath, '--recursive']
-        command += ['--profile', self.profile]
+        if self.profile:
+            command += ['--profile', self.profile]
         subprocess.run(command)
 
     def download(self, bucket_name, s3_srcpath, dstpath):
@@ -63,5 +64,6 @@ class S3UpDown(object):
 
         # 再帰的にファイルをDL
         command = ['aws', 's3', 'cp', src_in_s3, dstpath, '--recursive']
-        command += ['--profile', self.profile]
+        if self.profile:
+            command += ['--profile', self.profile]
         subprocess.run(command)

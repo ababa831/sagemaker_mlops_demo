@@ -136,6 +136,19 @@ class Model(object):
         print(f'モデル保存先を設定ファイル{self.config_path}を更新')
 
     def predict(self, dataset):
+        """入力データセット内'X'に対する推論結果yをデータセットに付与して返す
+        
+        Parameters
+        ----------
+        dataset : dict
+            前処理・特徴量エンジニアリング済みデータセット
+            {'X': shape(サンプル数, 変数の数), 'y': shape(サンプル数, )}
+        
+        Returns
+        -------
+        dict
+            推論結果'y'が更新されたデータセット
+        """        
         prefix = '/opt/ml/model'
         model_path_for_pred = Path(prefix).joinpath(self.config['model_path'])
 

@@ -46,7 +46,7 @@ class TestPreProcessor(object):
         ppmock.save_transformers(dst_dir=expected)
 
         expected_path = \
-            Path(expected).joinpath(ppmock.config['transformer_paths'])
+            Path(expected).joinpath(ppmock.config['transformers_path'])
         is_expected_path_exists = expected_path.exists
 
         shutil.rmtree(expected)  # テスト用に作成したオブジェクトを削除

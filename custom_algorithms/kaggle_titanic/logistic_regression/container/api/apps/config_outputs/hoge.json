@@ -151,7 +151,7 @@
         "bucket_name": "sample-titanic-logistic-regression",
         "path_s3_dst": "hello_123_world_456"
     },
-    "transformer_paths": "hello_123_world_456/sample_transformers.pkl.cmp",
+    "transformers_path": "hello_123_world_456/sample_transformers.pkl.cmp",
     "model_path": "hello_123_world_456/sample_model.pkl.cmp",
     "config_name": "hoge.json",
     "input_name": "train.csv"

@@ -3,8 +3,6 @@ from pathlib import Path
 import sys
 import shutil
 import traceback
-import logging
-from logging import getLogger, StreamHandler, Formatter
 
 from git import Repo
 import pandas as pd
@@ -14,6 +12,7 @@ from preprocessing import PreProcessor
 from model import Model
 from config_manager import ConfigManager
 from s3_updown import S3UpDown
+from utils import Utils
 
 repo_root = 6
 repo_abspath = Path(__file__).resolve().parents[repo_root]
@@ -24,7 +23,7 @@ def parse_arg():
     parser = ArgumentParser()
 
     parser.add_argument('input_path', type=str)
-    parser.add_argument('config_path', type=str)
+    parser.add_argument('config_name', type=str)
     parser.add_argument('-p',
                         '--project_name',
                         type=str,
@@ -34,31 +33,14 @@ def parse_arg():
                         type=str,
                         default=active_branch.commit.hexsha)
     parser.add_argument('-P', '--profile', type=str, default='dev')
-    parser.add_argument('-o', '--output_s3bucket', type=str, default='sample-titanic-logistic-regression')
+    parser.add_argument('-o',
+                        '--output_s3bucket',
+                        type=str,
+                        default='sample-titanic-logistic-regression')
 
     args = parser.parse_args()
 
     return args
-
-
-def init_logger():
-    logger = getLogger('trainer_sample')
-
-    # loggerのログレベル設定
-    logger.setLevel(logging.DEBUG)
-
-    stream_handler = StreamHandler()
-    # handlerのエラーメッセージのレベル
-    stream_handler.setLevel(logging.DEBUG)
-    # ログ出力フォーマット設定
-    handler_format = \
-        Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    stream_handler.setFormatter(handler_format)
-
-    # loggerにhandlerをセット
-    logger.addHandler(stream_handler)
-
-    return logger
 
 
 def _validate_train_data(df):
@@ -88,16 +70,19 @@ def load_train_data(input_path):
 
 
 if __name__ == "__main__":
-    logger = init_logger()
-
     args = parse_arg()
+
+    logger = Utils.init_logger(args.task_name)
 
     model_dir = './.models'
     child_dir = f'{args.project_name}_{args.task_name}'
+    working_dir = Path(__file__).parent.resolve()
 
     logger.info('実験設定')
     cm = ConfigManager()
-    cm.create_config(args.config_path)
+    # configの保存先ディレクトリは，推論側の都合上固定している．
+    config_path = working_dir.joinpath('config_outputs', args.config_name)
+    cm.create_config(config_path)
     s3_dst_info = {
         's3_config': {
             'aws_profile': args.profile,
@@ -105,13 +90,13 @@ if __name__ == "__main__":
             'path_s3_dst': child_dir
         }
     }
-    cm.add_info(args.config_path, s3_dst_info)
+    cm.add_info(config_path, s3_dst_info)
 
     logger.info('学習データのロード')
     train_df = load_train_data(args.input_path)
 
     logger.info('前処理・特徴量エンジニアリング')
-    pp = PreProcessor(config_path=args.config_path,
+    pp = PreProcessor(config_path=config_path,
                       mode='train',
                       label='Survived')
     train_dataset = pp.get_dataset(train_df)
@@ -119,7 +104,7 @@ if __name__ == "__main__":
                          transformers_name='sample_transformers.pkl.cmp')
 
     logger.info('学習')
-    m = Model(config_path=args.config_path, mode='train')
+    m = Model(config_path=config_path, mode='train')
     m.init_model()
     m.train_with_cv(train_dataset)
     m.save_model(dst_dir=model_dir,
@@ -130,13 +115,13 @@ if __name__ == "__main__":
     # S3のUpload対象にconfigと学習データも含めたいとき，以下の処理を行う
     # 1. configと学習データの情報を更新
     newinfo = {
-        'config_name': Path(args.config_path).name,
+        'config_name': Path(config_path).name,
         'input_name': Path(args.input_path).name
     }
-    cm.add_info(args.config_path, newinfo)
+    cm.add_info(config_path, newinfo)
     # 2. S3のUploadソースにconfigと学習データをコピー
     s3_src_dir_w_child = str(Path(model_dir).joinpath(child_dir))
-    shutil.copy(args.config_path, s3_src_dir_w_child)
+    shutil.copy(config_path, s3_src_dir_w_child)
     shutil.copy(args.input_path, s3_src_dir_w_child)
 
     # S3に推論時に利用する各種ファイルをUploadする

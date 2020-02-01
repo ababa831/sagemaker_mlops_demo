@@ -7,12 +7,13 @@ import subprocess
 
 from git import Repo
 
-from utils import Utils
+sd = Path(__file__).parent.resolve()
+sys.path.append(str(sd))
 
 
 class ConfigManager(object):
     def __init__(self):
-        repo_abspath = Path(__file__).resolve().parents[6]
+        repo_abspath = sd.parents[5]
         self.repo = Repo(repo_abspath)
 
     def create_config(self, dst_path):
@@ -101,6 +102,7 @@ class ConfigManager(object):
                 + 'dictでなければならない．'
             raise TypeError(errmsg)
 
+        from utils import Utils
         Utils.validate_dict(config, expected_keys)
 
         return config

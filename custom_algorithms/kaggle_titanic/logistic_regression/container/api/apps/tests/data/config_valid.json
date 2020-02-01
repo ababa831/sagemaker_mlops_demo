@@ -8,6 +8,6 @@
         "cv": 5,
         "return_train_score": true
     },
-    "transformer_paths": "/opt/ml/model/dummy_transformers",
+    "transformers_path": "/opt/ml/model/dummy_transformers",
     "model_path": "/opt/ml/model/dummy_model.pkl.cmp"
 }

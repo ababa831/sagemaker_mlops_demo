@@ -51,14 +51,14 @@ class DummyObjects(object):
     def create_dummy_dataset(self):
         self.dummy_dataset = {
             'X':
-            np.array([[0., 0., 3., 1., 0., 1., 0.],
-                      [0., 1., 1., 0., 1., 0., 1.],
-                      [0., 0., 2., 1., 0., 1., 0.],
-                      [0., 2., 3., 1., 0., 1., 0.],
-                      [0., 0., 3., 1., 0., 1., 0.],
-                      [0., 1., 1., 0., 1., 0., 1.],
-                      [0., 0., 2., 1., 0., 1., 0.],
-                      [0., 2., 3., 1., 0., 1., 0.],
+            np.array([[0., 0., 3., 1., 0., 1.,
+                       0.], [0., 1., 1., 0., 1., 0., 1.],
+                      [0., 0., 2., 1., 0., 1.,
+                       0.], [0., 2., 3., 1., 0., 1., 0.],
+                      [0., 0., 3., 1., 0., 1.,
+                       0.], [0., 1., 1., 0., 1., 0., 1.],
+                      [0., 0., 2., 1., 0., 1.,
+                       0.], [0., 2., 3., 1., 0., 1., 0.],
                       [1., 0., 3., 1., 0., 0., 0.]]),
             'y':
             np.array([1, 0, 0, 0, 1, 0, 0, 0, 0])
@@ -98,12 +98,14 @@ class DummyObjects(object):
         self.dummy_config = {
             'config_path': str(self.valid_config_path),
             'hyper_params': self.hyper_params,
-            'transformer_paths': str(self.dummy_transformes_path),
+            'transformers_path': str(self.dummy_transformes_path),
             'model_path': str(self.dummy_model_path)
         }
 
         with open(self.valid_config_path, 'w', encoding='utf8') as f:
             json.dump(self.dummy_config, f, ensure_ascii=False, indent=4)
+
+        shutil.copy(self.valid_config_path, self.pred_model_dir)
 
 
 @pytest.fixture

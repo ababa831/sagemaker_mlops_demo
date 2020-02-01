@@ -25,7 +25,7 @@ class PreProcessor(object):
         self.mode = mode
         cm = ConfigManager()
         if mode == 'pred':
-            expected_keys = ['transformer_paths']
+            expected_keys = ['transformers_path']
             self.config = cm.load_config(config_path, expected_keys)
             self.transformers = self._load_transformers(self.config)
         else:
@@ -43,7 +43,7 @@ class PreProcessor(object):
         """
         prefix = '/opt/ml/model'
         trans_path_for_pred = \
-            Path(prefix).joinpath(config['transformer_paths'])
+            Path(prefix).joinpath(config['transformers_path'])
 
         transformers = joblib.load(trans_path_for_pred)
         expected_keys = [
@@ -94,7 +94,7 @@ class PreProcessor(object):
         print(dst_path, 'に前処理・特徴量エンジニアリング用モデル等を保存')
 
         # 子ディレクトリ以下のパスを記録（推論時に使用）
-        self.config['transformer_paths'] = \
+        self.config['transformers_path'] = \
             Path(child_dir).joinpath(transformers_name)
         cm = ConfigManager()
         cm.save_config(self.config, self.config_path)

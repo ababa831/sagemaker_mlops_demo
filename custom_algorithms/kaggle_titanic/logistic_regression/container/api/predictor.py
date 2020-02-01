@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import json
 import flask
-
 """
 API用追加モジュール
 - ScoringService
@@ -44,11 +43,24 @@ def transformation():
 
     NOTE: httpステータスの例外は必要に応じて追記
     """
-    # 受信したJSONデータ
-    data = flask.request.get_json()
+    data = None
+    expected_mimetype = 'application/json'
+    # 受信データのチェック
+    if flask.request.content_type == expected_mimetype:
+        data = flask.request.get_json()  # 受信したJSONデータ
+    else:
+        return flask.Response(
+            response='This predictor only supports JSON data',
+            status=415,
+            mimetype='text/plain')
     # 推論
     result_dict = ScoringService.do_inference(data)
     # 推論結果をJSONとして返す
     return flask.Response(response=json.dumps(result_dict, cls=NumpyEncoder),
                           status=200,
                           mimetype='application/json')
+
+"""
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5008, debug=False)
+"""
