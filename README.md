@@ -33,3 +33,13 @@
 - `tests` ディレクトリはpytestによるテストコード置き場
 
 ## TODO: Intruduction
+
+## メモ
+
+- `git submodule update --init`
+    - 最新版のpullは `git submodule foreach git pull origin master`
+- `mlops_env_sample/envsettings`に.envを忘れずに設定
+- どこでdevと本番で差分がでるか？解説を書く
+- ユーザ辞書確認方法
+  - `echo '登録した単語' | mecab`
+- trainer.pyを実行するまえに該当バケットを作成していることを確認（IaCで設定するのが理想的）
