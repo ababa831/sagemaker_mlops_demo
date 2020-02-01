@@ -110,8 +110,7 @@ venv.bak/
 poetry.lock
 
 # VSCode
-.vscode/
-.devcontainer/
+devcontainer.env
 
 # Model Artifacts
 *.pkl
@@ -119,6 +118,6 @@ poetry.lock
 model*/
 .model*/
 
-# 例外
+# Not ignored
 !*valid*.csv
 !*dummy*
