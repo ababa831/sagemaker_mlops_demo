@@ -23,12 +23,14 @@ class PreProcessor(object):
         if mode not in ['train', 'pred']:
             raise ValueError('modeに"train", "pred"を指定してない．')
         self.mode = mode
+        cm = ConfigManager()
         if mode == 'pred':
-            cm = ConfigManager()
             expected_keys = ['transformer_paths']
             self.config = cm.load_config(config_path, expected_keys)
             self.transformers = self._load_transformers(self.config)
         else:
+            expected_keys = []
+            self.config = cm.load_config(config_path, expected_keys)
             self.transformers = {
                 'fillna_vals': {},
                 'onehot_encoders': {},

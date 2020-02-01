@@ -72,19 +72,23 @@ class ConfigManager(object):
 
     def save_config(self, config, config_path):
         config = self._posixpath2str(config)
+        if isinstance(config_path, PosixPath):
+            os.makedirs(config_path.parent, exist_ok=True)
+        else:
+            os.makedirs(Path(config_path).parent, exist_ok=True)
         with open(config_path, 'w', encoding='utf8') as f:
             json.dump(config, f, ensure_ascii=False, indent=4)
 
     def _posixpath2str(self, target_dict):
-        if not isinstance(target_dict, dict):
-            raise TypeError('入力データが辞書型でない')
-        for k, v in target_dict.items():
-            if isinstance(v, dict):
-                target_dict[k] = self._posixpath2str(v)
-            if isinstance(v, list):
-                target_dict[k] = [self._posixpath2str(v_val) for v_val in v]
-            elif isinstance(v, PosixPath):
-                target_dict[k] = str(v)
+        if isinstance(target_dict, dict):
+            for k, v in target_dict.items():
+                if isinstance(v, dict):
+                    target_dict[k] = self._posixpath2str(v)
+                if isinstance(v, list):
+                    target_dict[k] = \
+                        [self._posixpath2str(v_val) for v_val in v]
+                elif isinstance(v, PosixPath):
+                    target_dict[k] = str(v)
         return target_dict
 
     def load_config(self, config_path, expected_keys):
