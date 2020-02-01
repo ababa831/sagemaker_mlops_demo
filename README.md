@@ -39,7 +39,14 @@
 - `git submodule update --init`
     - 最新版のpullは `git submodule foreach git pull origin master`
 - `mlops_env_sample/envsettings`に.envを忘れずに設定
+- CircleCIのcontextにAWSの環境変数を設定をする旨
 - どこでdevと本番で差分がでるか？解説を書く
 - ユーザ辞書確認方法
-  - `echo '登録した単語' | mecab`
+    - `echo '登録した単語' | mecab`
 - trainer.pyを実行するまえに該当バケットを作成していることを確認（IaCで設定するのが理想的）
+- curl でpredictor.pyへPOST
+    ```request_example
+    $ docker exec -it 3e907e0460tent-Type:application/json' -d '{"PassengerId": [1, 2, 3],"Pclass": [3, 1, 3],"Name": ["Braund, Mr. Owen Harris", "Cumings, Mrs. John Bradley Florence Briggs Thayer", "Heikkinen, Miss. Laina"],"Sex": ["male", "female", "female"],"Age": [22.0, 38.0, 26.0],"SibSp": [1, 1, 0],"Parch": [0, 0, 0],"Ticket": ["A/5 21171", "PC 17599", "STON/O2. 3101282"],"Fare": [7.25, 71.2833, 7.925],"Cabin": ["C85", "C85", "C85"],"Embarked": ["S", "C", "S"]}' http://0.0.0.0:5008/invocations
+
+    {"Survived": [1, 0, 1]}
+    ```
