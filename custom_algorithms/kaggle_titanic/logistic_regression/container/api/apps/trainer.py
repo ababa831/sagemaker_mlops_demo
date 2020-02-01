@@ -1,4 +1,3 @@
-# TODO: 学習スクリプトの実装（Trains込み，ログ出力あり）
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
