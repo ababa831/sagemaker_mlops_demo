@@ -32,7 +32,7 @@ def parse_arg():
                         '--task_name',
                         type=str,
                         default=active_branch.commit.hexsha)
-    parser.add_argument('-P', '--profile', type=str, default='dev')
+    parser.add_argument('-P', '--profile', type=str, default='default')
     parser.add_argument('-o',
                         '--output_s3bucket',
                         type=str,
