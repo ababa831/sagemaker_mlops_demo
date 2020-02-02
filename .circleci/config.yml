@@ -3,7 +3,7 @@ version: 2.1
 executors:
   dev_executor:
     docker:
-      # サンプル故に，便宜上docker hubに"公開"したものをbase imageとした．
+      # サンプルのため，便宜上docker hubに"公開"したものをbase imageとした．
       # 基本的には，ECRやdocker hubのprivateで使用することを想定
       - image: ababa893/mlops_env_sample_ml_base:latest
   
@@ -19,7 +19,7 @@ jobs:
       - run:
           name: Print the Current Time
           command: date
-  unittests_kaggle_logistic:
+  kaggle_logistic:
     executor: dev_executor
     working_directory: ~/sagemaker_mlops_demo/
     steps:
@@ -30,7 +30,7 @@ jobs:
             cd /opt/program
             poetry add gitpython pytest-cov coveralls
       - run:
-          name: unittest
+          name: appsディレクトリ配下の各種スクリプトの単体テスト等を実行し，coverageレポートを作成
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
             pytest -vv -s --junitxml=test-reports/junit.xml --cov=tests --cov-report=html:test-reports tests/
@@ -40,6 +40,20 @@ jobs:
       - store_artifacts:
           path: custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/test-reports
           destination: test-reports
+      - run:
+          name: Build a SageMaker API image and push to ECR
+          command: |
+            cd custom_algorithms/kaggle_titanic/logistic_regression/container/
+            chmod +x build_and_push.sh
+            ./build_and_push.sh
+      - run:
+          name: Local API test
+          # docker run で渡す環境変数は，CircleCI管理画面のcontextまたはプロジェクトのEnvironment Variablesに予め設定したものを使う
+          command: |
+            cd custom_algorithms/kaggle_titanic/logistic_regression/container/tests
+            chmod +x entrypoint.sh
+            docker run -v $PWD:/tmp/working -w /tmp/working -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV kaggle-titanic-logistic-regression-api:latest entrypoint.sh
+
 
 workflows:
   dev_build_and_deploy_and_test_api:
@@ -53,7 +67,7 @@ workflows:
                 # - master
                 # - /test-env.*/
                 # - /stg-env.*/
-      - unittests_kaggle_logistic:
+      - kaggle_logistic:
           # context: sagemaker-dev-aws-key
           requires:
             - initial_job

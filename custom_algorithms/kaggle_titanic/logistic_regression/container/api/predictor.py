@@ -59,8 +59,3 @@ def transformation():
     return flask.Response(response=json.dumps(result_dict, cls=NumpyEncoder),
                           status=200,
                           mimetype='application/json')
-
-"""
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5008, debug=False)
-"""

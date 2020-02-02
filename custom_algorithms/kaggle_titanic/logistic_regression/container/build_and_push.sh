@@ -9,16 +9,16 @@ sagemaker_image=kaggle-titanic-logistic-regression-api
 
 # [引数の設定]
 # 本スクリプト実行時 引数によってSageMaker用imageのpush先（AWS環境）が変わる．
-# dev/stg/pro 環境を想定
+# dev/stg/prd 環境を想定
 base_profile="default"
 profile_to_push=${base_profile}
 env=$1
-if [ "$env" == "pro" ]
+if [ "$env" == "prd" ]
 then
-    profile_to_push="production"
+    profile_to_push="prd"
 elif [ "$env" == "stg" ]
 then
-    profile_to_push="staging"
+    profile_to_push="stg"
 fi
 
 # 使用するソースimage（ai_environment_jupyter）のタグ名を引数から受け取る．（何もなければlatest）
