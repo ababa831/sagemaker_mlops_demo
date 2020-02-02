@@ -54,12 +54,12 @@ class Train(object):
     def train(self):
         try:
             # s3からローカルに保存
-            backet_name = self.config['s3_config']['bucket_name']
+            bucket_name = self.config['s3_config']['bucket_name']
             s3_src_obj = self.config['s3_config']['path_s3_dst']
-            s3_src_path = f's3://{backet_name}/{s3_src_obj}'
+            s3_src_path = f's3://{bucket_name}/{s3_src_obj}'
             self.logger.info(f'{s3_src_path} から {self.path_dir_dst} へDL')
             s3ud = S3UpDown()
-            s3ud.download(backet_name, s3_src_obj, self.path_dir_dst)
+            s3ud.download(bucket_name, s3_src_obj, self.path_dir_dst)
             self.logger.info('Download complete!')
         except Exception as e:
             # エラー出力
