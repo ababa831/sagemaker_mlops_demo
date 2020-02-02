@@ -30,6 +30,8 @@ jobs:
     working_directory: ~/sagemaker_mlops_demo/
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - restore_cache:
           keys: 
             # 保存した最新のキャッシュを拾ってくるのでここでは -{{ epoch }} はいらない
@@ -50,6 +52,14 @@ jobs:
       - store_artifacts:
           path: custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/test-reports
           destination: test-reports
+      - run:
+          name: Install Docker client
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
       - run:
           name: Build a SageMaker API image and push to ECR
           command: |
