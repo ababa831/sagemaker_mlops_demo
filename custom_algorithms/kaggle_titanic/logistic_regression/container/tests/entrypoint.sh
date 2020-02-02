@@ -2,7 +2,7 @@
 
 # build_and_push.shでSageMakerAPI用コンテナイメージを作成したあとのローカルテスト環境構築に使用
 # このファイルのあるtestsディレクトリに移動 -> chmod +x entrypoint.shしたあとに
-# `$ docker run -d -v $PWD:/tmp/working -w /tmp/working -p 8080:8080 -e {環境変数設定} ... {作成したイメージ} entrypoint.sh`
+# `$ docker run -d -v $PWD:/opt/program/apitest -w /opt/program/apitest -p 8080:8080 -e {環境変数設定} ... {作成したイメージ} entrypoint.sh`
 # サーバが立ち上がったあとに，
 # http://localhost:8080 宛にリクエストを投げるテストコードtest_predictor.py を実行
 

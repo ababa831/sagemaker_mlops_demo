@@ -72,7 +72,7 @@ jobs:
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/tests
             chmod +x entrypoint.sh
-            docker run -v $PWD:/tmp/working -w /tmp/working -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV kaggle-titanic-logistic-regression-api:latest entrypoint.sh
+            docker run -v $PWD:/opt/program/apitest -w /opt/program/apitest -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV kaggle-titanic-logistic-regression-api:latest entrypoint.sh
 
 
 workflows:
