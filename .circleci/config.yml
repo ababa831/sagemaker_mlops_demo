@@ -63,6 +63,7 @@ jobs:
       - run:
           name: Build a SageMaker API image and push to ECR
           command: |
+            aws sts get-caller-identity --query Account --output text
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/
             chmod +x build_and_push.sh
             ./build_and_push.sh
