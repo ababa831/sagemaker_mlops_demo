@@ -14,16 +14,26 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Greeting
-          command: echo Hello, world.
-      - run:
-          name: Print the Current Time
-          command: date
+        name: set aws profile
+        # CircleCI管理画面のContextsまたはEnvironment Variablesで設定したAWSのアクセスキー環境変数から，
+        # AWS CLIで参照する設定プロファイルを作成して，以後キャッシュとして読み込めるようにする
+        command: |
+          cd .circleci
+          chmod +x awscli_setting.sh
+          ./awscli_setting.sh
+    - save_cache:
+        key: aws-configure-settings-{{ epoch }}
+        paths:
+          - ~/.aws
   kaggle_logistic:
     executor: dev_executor
     working_directory: ~/sagemaker_mlops_demo/
     steps:
       - checkout
+      - restore_cache:
+        keys: 
+          # 保存した最新のキャッシュを拾ってくるのでここでは -{{ epoch }} はいらない
+          - aws-configure-settings
       - run:
           name: add gitpython package
           command: |
