@@ -12,10 +12,6 @@ sys.path.append(str(sd))
 
 
 class ConfigManager(object):
-    def __init__(self):
-        repo_abspath = sd.parents[5]
-        self.repo = Repo(repo_abspath)
-
     def create_config(self, dst_path):
         """trainer用の設定を新規作成する．
         
@@ -28,8 +24,12 @@ class ConfigManager(object):
         dst_path : str
             設定ファイルの出力先パス
         """
+        # trainer用の設定に必要な情報の取得
+        repo_root = 5
+        repo = Repo(sd.parents[repo_root])
         pip_freezed = subprocess.run(['pip', 'freeze'], stdout=subprocess.PIPE)
         packages = pip_freezed.stdout.decode('utf-8').split()
+        # 設定の新規作成
         config = {
             'config_path': Path(dst_path).resolve(),  # training時のみ使用
             'hyper_params': {
@@ -46,8 +46,8 @@ class ConfigManager(object):
                 'packages': packages
             },
             'repository': {
-                'active_branch': self.repo.active_branch.name,
-                'commit_version': self.repo.active_branch.commit.hexsha
+                'active_branch': repo.active_branch.name,
+                'commit_version': repo.active_branch.commit.hexsha
             }
         }
         self.save_config(config, dst_path)

@@ -1,5 +1,4 @@
 import traceback
-import sys
 from pathlib import Path
 import os
 import joblib
