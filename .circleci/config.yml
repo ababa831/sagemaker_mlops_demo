@@ -21,6 +21,7 @@ jobs:
             cd .circleci
             chmod +x awscli_setting.sh
             ./awscli_setting.sh
+            aws sts get-caller-identity --query Account --output text
       - save_cache:
           key: aws-configure-settings-{{ epoch }}
           paths:
