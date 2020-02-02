@@ -36,7 +36,7 @@ def test_api():
     # 推論結果の表示
     print('ステータスコード:', status_code)
     print('レスポンスBody: \n', result_dic)
-    errmsg = f'異常終了 HTTP status: {status_code}\n エラー: \n{result_dic}'
+    errmsg = f'異常終了 HTTP status: {status_code}\n'
     assert status_code == 200, errmsg
     print('Payload size: ', int(payload))
 
