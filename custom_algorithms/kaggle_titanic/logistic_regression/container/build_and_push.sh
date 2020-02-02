@@ -59,6 +59,7 @@ $(aws ecr get-login --profile ${base_profile} --region ${region} --no-include-em
 # ECRからpull
 src_fullname=${account}.dkr.ecr.${region}.amazonaws.com/${src_image}:${tag}
 docker pull ${src_fullname}
+docker tag ${src_fullname} ${src_image}:${tag}
 
 
 # [Push先に関する設定]
