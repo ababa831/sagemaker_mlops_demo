@@ -15,7 +15,7 @@ def test_api():
     print('リクエストBody: \n', test_data, '\n')
 
     # データの送信
-    url = 'http://localhost:8080/invocations'
+    url = 'http://0.0.0.0:8080/invocations'
     method = 'POST'
     headers = {
         'Content-Type': 'application/json',
