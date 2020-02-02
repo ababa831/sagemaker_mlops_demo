@@ -25,6 +25,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: add gitpython package
+          command: |
+            cd /opt/program
+            poetry add pytest-cov coveralls
+      - run:
           name: appsディレクトリ配下の各種スクリプトの単体テスト等を実行し，coverageレポートを作成
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
