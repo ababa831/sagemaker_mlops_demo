@@ -16,6 +16,7 @@ def test_api():
     print('リクエストBody: \n', test_data, '\n')
 
     # データの送信
+    print('API起動まで暫く待機')
     time.sleep(60)  # CircleCI上のAPI起動待機時間
     url = 'http://0.0.0.0:8080/invocations'
     method = 'POST'
