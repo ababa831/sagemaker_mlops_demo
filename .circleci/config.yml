@@ -31,9 +31,9 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-        keys: 
-          # 保存した最新のキャッシュを拾ってくるのでここでは -{{ epoch }} はいらない
-          - aws-configure-settings
+          keys: 
+            # 保存した最新のキャッシュを拾ってくるのでここでは -{{ epoch }} はいらない
+            - aws-configure-settings
       - run:
           name: add gitpython package
           command: |
