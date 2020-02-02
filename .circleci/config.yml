@@ -72,7 +72,7 @@ jobs:
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/tests
             docker run -it -d -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV -e REGION=$REGION kaggle-titanic-logistic-regression-api entrypoint.sh
-
+            python test_local_api.py
 
 workflows:
   dev_build_and_deploy_and_test_api:
