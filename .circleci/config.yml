@@ -14,13 +14,13 @@ jobs:
     steps:
       - checkout
       - run:
-        name: set aws profile
-        # CircleCI管理画面のContextsまたはEnvironment Variablesで設定したAWSのアクセスキー環境変数から，
-        # AWS CLIで参照する設定プロファイルを作成して，以後キャッシュとして読み込めるようにする
-        command: |
-          cd .circleci
-          chmod +x awscli_setting.sh
-          ./awscli_setting.sh
+          name: set aws profile
+          # CircleCI管理画面のContextsまたはEnvironment Variablesで設定したAWSのアクセスキー環境変数から，
+          # AWS CLIで参照する設定プロファイルを作成して，以後キャッシュとして読み込めるようにする
+          command: |
+            cd .circleci
+            chmod +x awscli_setting.sh
+            ./awscli_setting.sh
       - save_cache:
           key: aws-configure-settings-{{ epoch }}
           paths:
