@@ -1,6 +1,7 @@
 from pathlib import Path
 import urllib.request
 import json
+import time
 
 
 def test_api():
@@ -15,6 +16,7 @@ def test_api():
     print('リクエストBody: \n', test_data, '\n')
 
     # データの送信
+    time.sleep(60)  # CircleCI上のAPI起動待機時間
     url = 'http://0.0.0.0:8080/invocations'
     method = 'POST'
     headers = {
