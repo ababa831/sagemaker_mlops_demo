@@ -66,14 +66,13 @@ jobs:
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/
             chmod +x build_and_push.sh
             ./build_and_push.sh
-            cp ../image_tag.txt tests/
       - run:
           name: Local API test
           # docker run で渡す環境変数は，CircleCI管理画面のcontextまたはプロジェクトのEnvironment Variablesに予め設定したものを使う
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/tests
             chmod +x entrypoint.sh
-            docker run -v $PWD:/opt/program/apitest -w /opt/program/apitest -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV kaggle-titanic-logistic-regression-api:$(echo | cat image_tag.txt) entrypoint.sh
+            docker run -v $PWD:/opt/program/apitest -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV kaggle-titanic-logistic-regression-api apitest/entrypoint.sh
 
 
 workflows:
