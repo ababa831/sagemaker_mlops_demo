@@ -94,6 +94,9 @@ echo ${datetime} > ../image_tag.txt
 chmod +x api/train
 chmod +x api/serve
 
+# ローカルAPIテスト用エントリポイントに権限を付与
+chmod +x entrypoint.sh
+
 # apiディレクトリ以下を反映させたdocker imageをビルドして，ECRヘPush
 docker build  -t ${sagemaker_image} .
 sagemaker_fullname="${account}.dkr.ecr.${region}.amazonaws.com/${sagemaker_image}:${datetime}"

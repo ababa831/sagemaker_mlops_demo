@@ -15,5 +15,8 @@ RUN cd /opt/program && poetry install --no-dev
 # 検証環境にあらかじめ入れるのではなく，できればここでCOPYさせたい）
 COPY api /opt/program
 
+# ローカルテスト用エントリポイントをコピー
+COPY entrypoint.sh /opt/program
+
 # 既に/opt/programが作業ディレクトリであるはずだが，念の為再登録
 WORKDIR /opt/program

@@ -71,8 +71,7 @@ jobs:
           # docker run で渡す環境変数は，CircleCI管理画面のcontextまたはプロジェクトのEnvironment Variablesに予め設定したものを使う
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/tests
-            chmod +x entrypoint.sh
-            docker run -v $PWD:/opt/program/apitest -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV kaggle-titanic-logistic-regression-api /opt/program/apitest/entrypoint.sh
+            docker run -it -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV kaggle-titanic-logistic-regression-api entrypoint.sh
 
 
 workflows:
