@@ -118,6 +118,9 @@ devcontainer.env
 model*/
 .model*/
 
+# Others
+image_tag.txt
+
 # Not ignored
 !*valid*.csv
 !*dummy*
