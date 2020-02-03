@@ -76,6 +76,13 @@ jobs:
             sleep 20
             docker exec -it local_api curl -I http://0.0.0.0:8080/ping
             docker exec -it local_api curl -X POST -H 'Content-Type: application/json' -d '{"PassengerId": [1, 2, 3, 4],"Pclass": [3, 1, 3, 3],"Name": ["Braund, Mr. Owen Harris", "Cumings, Mrs. John Bradley Florence Briggs Thayer", "Heikkinen, Miss. Laina", "Braund, Mr. Owen Harris"],"Sex": ["male", "female", "female", "male"],"Age": [22.0, 38.0, 26.0, 24.0],"SibSp": [1, 1, 0, 1],"Parch": [0, 0, 0, 0],"Ticket": ["A/5 21171", "PC 17599", "STON/O2. 3101282", "PC 17599"],"Fare": [7.25, 71.2833, 7.925, 7.225],"Cabin": ["C85", "C85", "C85", "C85"],"Embarked": ["S", "NA", "C", "Q"]}' http://0.0.0.0:8080/invocations
+      - run:
+          name: generateEndpointでdev環境にSageMakerAPIをデプロイ
+          # python-dotenvのインストールコマンドはtmp処理．TODO: 後で検証環境のpyproject.tomlに追加
+          command: |
+            cd custom_algorithms/kaggle_titanic/logistic_regression/
+            poetry install python-dotenv
+            python generate_endpoint.py  --env=dev --allow-test
 
 workflows:
   dev_build_and_deploy_and_test_api:
