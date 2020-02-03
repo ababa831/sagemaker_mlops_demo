@@ -1,0 +1,13 @@
+{
+	"name": "mlops env sample",
+	"dockerComposeFile": [
+		"../mlops_env_sample/docker-compose.yml"
+	],
+	"service": "ml_base",
+	"workspaceFolder": "/opt/program/workspace",
+	"shutdownAction": "stopCompose",
+	"extensions": [
+		"ms-python.python",
+		"njpwerner.autodocstring"
+	]
+}

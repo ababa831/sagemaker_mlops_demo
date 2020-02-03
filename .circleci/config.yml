@@ -1,0 +1,119 @@
+version: 2.1
+
+executors:
+  dev_executor:
+    docker:
+      # サンプルのため，便宜上docker hubに"公開"したものをbase imageとした．
+      # 基本的には，ECRやdocker hubのprivateで使用することを想定
+      - image: ababa893/mlops_env_sample_ml_base:latest
+  
+jobs:
+  initial_job:
+    executor: dev_executor
+    working_directory: ~/sagemaker_mlops_demo/
+    steps:
+      - checkout
+      - run:
+          name: AWS CLI用設定プロファイルの作成
+          # CircleCI管理画面のContextsまたはEnvironment Variablesで設定したAWSのアクセスキー環境変数から，
+          # AWS CLIで参照する設定プロファイルを作成して，以後キャッシュとして読み込めるようにする
+          command: |
+            cd .circleci
+            chmod +x awscli_setting.sh
+            ./awscli_setting.sh
+      - save_cache:
+          key: aws-configure-settings-{{ epoch }}
+          paths:
+            - ~/.aws
+  local_test_kaggle_logistic:
+    executor: dev_executor
+    working_directory: ~/sagemaker_mlops_demo/
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - restore_cache:
+          keys: 
+            # 保存した最新のキャッシュを拾ってくるのでここでは -{{ epoch }} はいらない
+            - aws-configure-settings
+      - run:
+          name: coverageレポート作成に必要なパッケージをインストール（tmp）
+          command: |
+            cd /opt/program
+            poetry add pytest-cov coveralls
+      - run:
+          name: appsディレクトリ配下の各種スクリプトの単体テスト等を実行し，coverageレポートを作成
+          command: |
+            cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
+            pytest -vv -s --junitxml=test-reports/junit.xml --cov=tests --cov-report=html:test-reports tests/
+            coveralls
+      - store_test_results:
+          path: custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/test-reports
+      - store_artifacts:
+          path: custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/test-reports
+          destination: test-reports
+      - run:
+          name: Docker clientのインストール
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+      - run:
+          name: SageMakerAPIイメージのビルド and ECRへpush
+          command: |
+            cd custom_algorithms/kaggle_titanic/logistic_regression/container/
+            chmod +x build_and_push.sh
+            ./build_and_push.sh
+      - run:
+          name: build_and_push.shで作成したSageMakerAPIコンテナをテスト
+          # 直接curlを叩くとconnection refused -> 応急処置: docker execでコンテナに入り，curl
+          # docker run で渡す環境変数は，CircleCI管理画面のcontextまたはプロジェクトのEnvironment Variablesに予め設定したものを使う
+          command: |
+            cd custom_algorithms/kaggle_titanic/logistic_regression/container/tests
+            docker run -d --name local_api --expose 8080 -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV -e REGION=$REGION kaggle-titanic-logistic-regression-api entrypoint.sh
+            sleep 20
+            docker exec -it local_api curl -I http://0.0.0.0:8080/ping
+            docker exec -it local_api curl -X POST -H 'Content-Type: application/json' -d '{"PassengerId": [1, 2, 3, 4],"Pclass": [3, 1, 3, 3],"Name": ["Braund, Mr. Owen Harris", "Cumings, Mrs. John Bradley Florence Briggs Thayer", "Heikkinen, Miss. Laina", "Braund, Mr. Owen Harris"],"Sex": ["male", "female", "female", "male"],"Age": [22.0, 38.0, 26.0, 24.0],"SibSp": [1, 1, 0, 1],"Parch": [0, 0, 0, 0],"Ticket": ["A/5 21171", "PC 17599", "STON/O2. 3101282", "PC 17599"],"Fare": [7.25, 71.2833, 7.925, 7.225],"Cabin": ["C85", "C85", "C85", "C85"],"Embarked": ["S", "NA", "C", "Q"]}' http://0.0.0.0:8080/invocations
+  dev_deploy_kaggle_logistic:
+    executor: dev_executor
+    working_directory: ~/sagemaker_mlops_demo/
+    steps:
+      - checkout
+      - restore_cache:
+          keys: 
+            - aws-configure-settings
+      - run:
+          name: python-dotenvのインストールコマンドはtmp処理．後で検証環境のpyproject.tomlに追加
+          command: |
+            cd /opt/program
+            poetry install python-dotenv
+      - run:
+          name: generateEndpointでdev環境にSageMakerAPIをデプロイ
+          command: |
+            cd custom_algorithms/kaggle_titanic/logistic_regression/
+            python generate_endpoint.py  --env=dev --allow-test
+
+
+workflows:
+  dev_build_and_deploy_and_test_api:
+    jobs:
+      - initial_job
+          # context: sagemaker-dev-aws-key
+      - local_test_kaggle_logistic:
+          # context: sagemaker-dev-aws-key
+          requires:
+            - initial_job
+          filters:
+            branches:
+              only:
+                - /feature.*/
+      - dev_deploy_kaggle_logistic:
+          # context: sagemaker-dev-aws-key
+          requires:
+            - initial_job
+          filters:
+            branches:
+              only:
+                - /test-env.*/
