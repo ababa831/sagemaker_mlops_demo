@@ -83,7 +83,6 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            # 保存した最新のキャッシュを拾ってくるのでここでは -{{ epoch }} はいらない
             - aws-configure-settings
       - run:
           name: python-dotenvのインストールコマンドはtmp処理．後で検証環境のpyproject.tomlに追加
@@ -111,10 +110,10 @@ workflows:
               only:
                 - /feature.*/
       - dev_deploy_kaggle_logistic:
-        # context: sagemaker-dev-aws-key
-        requires:
-          - local_test_kaggle_logistic
-        filters:
-          branches:
-            only:
-              - /test-env.*/
+          # context: sagemaker-dev-aws-key
+          requires:
+            - local_test_kaggle_logistic
+          filters:
+            branches:
+              only:
+                - /test-env.*/
