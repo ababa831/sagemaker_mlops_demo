@@ -47,7 +47,8 @@ class Train(object):
 
         # S3Upload先情報が保存されている設定の読み込み
         path_dir_config = sd.joinpath('apps', 'config_outputs')
-        config_path = cm.get_newest_filepath(path_dir_config)
+        config_path = \
+            cm.get_newest_filepath(path_dir_config, searchmode='filename')
         expected_keys = ['s3_config']
         self.config = cm.load_config(config_path, expected_keys)
 
