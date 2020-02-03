@@ -1,0 +1,13 @@
+{
+    "PassengerId": [1, 2, 3, 4],
+    "Pclass": [3, 1, 3, 1],
+    "Name": ["Braund, Mr. Owen Harris", "Cumings, Mrs. John Bradley (Florence Briggs Thayer)", "Heikkinen, Miss. Laina", "Heikkinen, Miss. Laina"],
+    "Sex": ["male", "female", "female", "male"],
+    "Age": [22.0, 38.0, 26.0, 23.0],
+    "SibSp": [1, 1, 0, 0],
+    "Parch": [0, 0, 0, 0],
+    "Ticket": ["A/5 21171", "PC 17599", "STON/O2. 3101282", "PC 17599"],
+    "Fare": [7.25, 71.2833, 7.925, 6.789],
+    "Cabin": ["C85", "C85", "C85", "C85"],
+    "Embarked": ["S", "Q", "NA", "C"]
+}
