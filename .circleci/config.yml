@@ -66,6 +66,10 @@ jobs:
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/
             chmod +x build_and_push.sh
             ./build_and_push.sh
+      - save_cache:
+          key: image-tag-{{ epoch }}
+          paths:
+            - /root/sagemaker_mlops_demo/custom_algorithms/kaggle_titanic/logistic_regression/image_tag.txt
       - run:
           name: build_and_push.shで作成したSageMakerAPIコンテナをテスト
           # 直接curlを叩くとconnection refused -> 応急処置: docker execでコンテナに入り，curl
@@ -84,6 +88,7 @@ jobs:
       - restore_cache:
           keys: 
             - aws-configure-settings
+            - image-tag            
       - run:
           name: python-dotenvのインストールコマンドはtmp処理．後で検証環境のpyproject.tomlに追加
           command: |
