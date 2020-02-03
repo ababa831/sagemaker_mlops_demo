@@ -42,8 +42,8 @@ class PreProcessor(object):
         """保存したログからtransformers 辞書を取得
         """
         prefix = '/opt/ml/model'
-        trans_path_for_pred = \
-            Path(prefix).joinpath(config['transformers_path'])
+        filename = Path(config['transformers_path']).name
+        trans_path_for_pred = Path(prefix).joinpath(filename)
 
         transformers = joblib.load(trans_path_for_pred)
         expected_keys = [

@@ -22,7 +22,7 @@ class ScoringService(object):
     transformers = None
 
     @classmethod
-    def check_if_all_models_exist(cls):
+    def check_if_all_models_loaded(cls):
         """推論に仕様するモデル等が全て正常にロードできるかチェック
         
         Returns

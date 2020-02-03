@@ -149,7 +149,8 @@ class Model(object):
             推論結果'y'が更新されたデータセット
         """        
         prefix = '/opt/ml/model'
-        model_path_for_pred = Path(prefix).joinpath(self.config['model_path'])
+        filename = Path(self.config['model_path']).name
+        model_path_for_pred = Path(prefix).joinpath(filename)
 
         self._validate_dataset(dataset)
 
