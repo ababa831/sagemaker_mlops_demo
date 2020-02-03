@@ -68,12 +68,14 @@ jobs:
             ./build_and_push.sh
       - run:
           name: build_and_push.shで作成したSageMakerAPIコンテナをテスト
+          # 直接curlを叩くとconnection refused -> 応急処置: docker execでコンテナに入り，curl
           # docker run で渡す環境変数は，CircleCI管理画面のcontextまたはプロジェクトのEnvironment Variablesに予め設定したものを使う
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/tests
-            docker run -d --expose 8080 -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV -e REGION=$REGION kaggle-titanic-logistic-regression-api entrypoint.sh
+            docker run -d --name local_api --expose 8080 -p 8080:8080 -e AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV -e REGION=$REGION kaggle-titanic-logistic-regression-api entrypoint.sh
             sleep 20
-            curl -X POST -H 'Content-Type: application/json' -d '{"PassengerId": [1, 2, 3],"Pclass": [3, 1, 3],"Name": ["Braund, Mr. Owen Harris", "Cumings, Mrs. John Bradley Florence Briggs Thayer", "Heikkinen, Miss. Laina"],"Sex": ["male", "female", "female"],"Age": [22.0, 38.0, 26.0],"SibSp": [1, 1, 0],"Parch": [0, 0, 0],"Ticket": ["A/5 21171", "PC 17599", "STON/O2. 3101282"],"Fare": [7.25, 71.2833, 7.925],"Cabin": ["C85", "C85", "C85"],"Embarked": ["S", "C", "S"]}' http://0.0.0.0:8080/invocations
+            docker exec -it local_api curl -I http://0.0.0.0:8080/ping
+            docker exec -it local_api curl -I -X POST -H 'Content-Type: application/json' -d '{"PassengerId": [1, 2, 3],"Pclass": [3, 1, 3],"Name": ["Braund, Mr. Owen Harris", "Cumings, Mrs. John Bradley Florence Briggs Thayer", "Heikkinen, Miss. Laina"],"Sex": ["male", "female", "female"],"Age": [22.0, 38.0, 26.0],"SibSp": [1, 1, 0],"Parch": [0, 0, 0],"Ticket": ["A/5 21171", "PC 17599", "STON/O2. 3101282"],"Fare": [7.25, 71.2833, 7.925],"Cabin": ["C85", "C85", "C85"],"Embarked": ["S", "C", "S"]}' http://0.0.0.0:8080/invocations
 
 workflows:
   dev_build_and_deploy_and_test_api:
