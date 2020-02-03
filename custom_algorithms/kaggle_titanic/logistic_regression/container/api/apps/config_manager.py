@@ -4,6 +4,8 @@ import platform
 import json
 import sys
 import subprocess
+import re
+from datetime import datetime
 
 from git import Repo
 
@@ -29,9 +31,11 @@ class ConfigManager(object):
         repo = Repo(sd.parents[repo_root])
         pip_freezed = subprocess.run(['pip', 'freeze'], stdout=subprocess.PIPE)
         packages = pip_freezed.stdout.decode('utf-8').split()
+        self.dst_path = self._dst_path_w_timestamp(dst_path)
+
         # 設定の新規作成
         config = {
-            'config_path': Path(dst_path).resolve(),  # training時のみ使用
+            'config_path': Path(self.dst_path).resolve(),  # training時のみ使用
             'hyper_params': {
                 'random_state': 0,
                 'solver': 'lbfgs',
@@ -48,9 +52,18 @@ class ConfigManager(object):
             'repository': {
                 'active_branch': repo.active_branch.name,
                 'commit_version': repo.active_branch.commit.hexsha
-            }
+            },
+            'train_datetime': self.train_dt
         }
-        self.save_config(config, dst_path)
+        self.save_config(config, self.dst_path)
+
+    def _dst_path_w_timestamp(self, dst_path):
+        self.train_dt = datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')
+        if isinstance(dst_path, PosixPath):
+            dst_path = str(dst_path)
+        dst_path = dst_path.replace('.json', '')
+        dst_path += f'_{self.train_dt}.json'
+        return dst_path
 
     def remove_info(self, config_path, target_keys):
         with open(config_path, encoding='utf-8') as f:
@@ -107,21 +120,32 @@ class ConfigManager(object):
 
         return config
 
-    def get_newest_filepath(self, config_dir):
+    def get_newest_filepath(self, config_dir, searchmode=None):
         path_config_dir = Path(config_dir)
         if not path_config_dir.exists():
             raise IOError(f'{config_dir}が存在しません．')
         config_filepaths = path_config_dir.glob('*.json')
+        config_filepaths = list(map(str, config_filepaths))
 
-        max_birthtime = 0
-        newest_filepath = None
-        for cf in config_filepaths:
-            birthtime = self._creation_date(cf)
-            if max_birthtime < birthtime:
-                max_birthtime = birthtime
-                newest_filepath = cf
+        if searchmode == 'filename':
+            pattern = r'.*_'
+            created_times = \
+                [re.sub(pattern, '', cfp) for cfp in config_filepaths]
+            created_latest = sorted(created_times, reverse=True)[0]
+            newest_filepath = None
+            for cfp in config_filepaths:
+                if cfp.endswith(created_latest):
+                    newest_filepath = cfp
+        else:
+            max_birthtime = 0
+            newest_filepath = None
+            for cf in config_filepaths:
+                birthtime = self._creation_date(cf)
+                if max_birthtime < birthtime:
+                    max_birthtime = birthtime
+                    newest_filepath = cf
 
-        return newest_filepath
+        return Path(newest_filepath)
 
     def _creation_date(self, path_to_file):
         """

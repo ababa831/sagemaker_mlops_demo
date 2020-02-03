@@ -1,5 +1,5 @@
 {
-    "config_path": "/opt/program/workspace/custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/config_outputs/sample2.json",
+    "config_path": "/opt/program/workspace/custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/config_outputs/sample_2020-02-03-14-14-03-764147.json",
     "hyper_params": {
         "random_state": 0,
         "solver": "lbfgs",
@@ -144,15 +144,7 @@
     },
     "repository": {
         "active_branch": "feature/basic_api_implementation",
-        "commit_version": "86e763f7c32e64f152208594fcaf7d8f16746583"
+        "commit_version": "dcbafa3a2402ef1cec404cf56c15050d8c5b7533"
     },
-    "s3_config": {
-        "aws_profile": "default",
-        "bucket_name": "sample-titanic-logistic-regression",
-        "path_s3_dst": "feature_basic_api_implementation_86e763f7c32e64f152208594fcaf7d8f16746583"
-    },
-    "transformers_path": "feature_basic_api_implementation_86e763f7c32e64f152208594fcaf7d8f16746583/sample_transformers.pkl.cmp",
-    "model_path": "feature_basic_api_implementation_86e763f7c32e64f152208594fcaf7d8f16746583/sample_model.pkl.cmp",
-    "config_name": "sample2.json",
-    "input_name": "train.csv"
+    "train_datetime": "2020-02-03-14-14-03-764147"
 }

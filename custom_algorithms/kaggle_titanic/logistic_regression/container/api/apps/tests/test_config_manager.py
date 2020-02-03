@@ -28,10 +28,15 @@ class TestConfigManager(object):
     @pytest.fixture
     def conf_paths(self):
         dummy_config = {'a': 1, 'b': 2}
-        unorders = [2, 6, 3]
+        unorders = [
+            '2020-02-02-13-50-15-406591', '2020-02-03-13-50-17-192458',
+            '2020-01-03-13-50-17-192458', '2020-02-13-13-50-18-020840'
+        ]
+        dummy_config_dir = sd.joinpath('data/cp/')
+        os.makedirs(dummy_config_dir, exist_ok=True)
         config_paths = []
         for i in unorders:
-            config_path = sd.joinpath(f'data/dummy_conf{i}.json')
+            config_path = dummy_config_dir.joinpath(f'dummy_conf_{i}.json')
             with open(config_path, 'w', encoding='utf8') as f:
                 json.dump(dummy_config, f)
             config_paths.append(config_path)
@@ -91,7 +96,16 @@ class TestConfigManager(object):
         os.remove(conf['path'])
 
     # get_newest_filepathメソッド
-    def test_最新のconfigが取得できていればTrue(self, conf_paths, cmmock):
+    def test_filenameモードで最新のconfigが取得できていればTrue(self, conf_paths, cmmock):
+        config_dir = conf_paths[0].parent
+        result_path = \
+            cmmock.get_newest_filepath(config_dir, searchmode='filename')
+        for cp in conf_paths:
+            os.remove(cp)
+        expected = conf_paths[-1]
+        assert result_path == expected
+
+    def test_ファイル作成情報から最新のconfigが取得できていればTrue(self, conf_paths, cmmock):
         config_dir = conf_paths[0].parent
         result_path = cmmock.get_newest_filepath(config_dir)
         for cp in conf_paths:

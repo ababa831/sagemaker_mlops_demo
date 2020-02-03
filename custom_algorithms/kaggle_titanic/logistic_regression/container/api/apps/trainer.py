@@ -81,8 +81,10 @@ if __name__ == "__main__":
     logger.info('実験設定')
     cm = ConfigManager()
     # configの保存先ディレクトリは，推論側の都合上固定している．
-    config_path = working_dir.joinpath('config_outputs', args.config_name)
-    cm.create_config(config_path)
+    config_path_wo_datetime = \
+        working_dir.joinpath('config_outputs', args.config_name)
+    cm.create_config(config_path_wo_datetime)
+    config_path = cm.dst_path
     s3_dst_info = {
         's3_config': {
             'aws_profile': args.profile,
