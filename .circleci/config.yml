@@ -114,6 +114,7 @@ workflows:
             branches:
               only:
                 - /feature.*/
+                - /test-env.*/
       - dev_deploy_kaggle_logistic:
           # context: sagemaker-dev-aws-key
           requires:
