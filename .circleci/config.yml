@@ -117,7 +117,7 @@ workflows:
       - dev_deploy_kaggle_logistic:
           # context: sagemaker-dev-aws-key
           requires:
-            - initial_job
+            - local_test_kaggle_logistic
           filters:
             branches:
               only:
