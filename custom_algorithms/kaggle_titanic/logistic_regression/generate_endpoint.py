@@ -19,7 +19,7 @@ load_dotenv(dotenv_path)
 PATH_INPUT_TRAIN = './data/train_dummy.csv'
 PATH_INPUT_TEST = './data/test_dummy.csv'
 
-endpoint_prefix = 'kaggle-logistic'
+endpoint_prefix = 'kaggle-logistic-'
 endpoint_suffix = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 limit_len_endpoint = 63  # エンドポイント名は最長63に制限される
 
