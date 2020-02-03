@@ -210,7 +210,7 @@ if __name__ == '__main__':
     predictor = clf.deploy(1, 'ml.t2.medium', endpoint_name=endpoint_name)
     print('Created EndpointName: ' + endpoint_name)
     os.remove('./test_data.pkl')
-    if parser().allow_test:
+    if args.allow_test:
         print('作成したエンドポイントの動作テストを行います')
         do_test_endpoint(args.env)
 
