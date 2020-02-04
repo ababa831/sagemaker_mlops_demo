@@ -98,6 +98,7 @@ jobs:
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/
             aws ecr describe-images --repository-name kaggle-titanic-logistic-regression-api --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' |  sed -e 's/"//g' > image_tag.txt
+            echo | cat image_tag.txt
             python generate_endpoint.py  --env=dev --allow-test
 
 
