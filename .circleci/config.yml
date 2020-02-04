@@ -3,9 +3,8 @@ version: 2.1
 executors:
   dev_executor:
     docker:
-      # サンプルのため，便宜上docker hubに"公開"したものをbase imageとした．
       # 基本的には，ECRやdocker hubのprivateで使用することを想定
-      - image: ababa893/mlops_env_sample_ml_base:latest
+      - image: 854373440263.dkr.ecr.ap-northeast-1.amazonaws.com/mlops_env_sample_ml_base
 commands:
   install_docker:
     steps:
