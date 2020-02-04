@@ -94,12 +94,10 @@ jobs:
             cd /opt/program
             poetry add python-dotenv
       - run:
-          name: generateEndpointでdev環境にSageMakerAPIをデプロイ
+          name: generateEndpointでdev環境にSageMakerAPIをデプロイ（前ジョブでPushしたコンテナイメージを利用）
           command: |
-            cd custom_algorithms/kaggle_titanic/logistic_regression/container/
-            chmod +x build_and_push.sh
-            ./build_and_push.sh
-            cd ../
+            cd custom_algorithms/kaggle_titanic/logistic_regression/
+            aws ecr describe-images --repository-name kaggle-titanic-logistic-regression-api --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' |  sed -e 's/"//g' > image_tag.txt
             python generate_endpoint.py  --env=dev --allow-test
 
 
