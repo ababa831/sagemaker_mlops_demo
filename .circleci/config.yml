@@ -6,7 +6,19 @@ executors:
       # サンプルのため，便宜上docker hubに"公開"したものをbase imageとした．
       # 基本的には，ECRやdocker hubのprivateで使用することを想定
       - image: ababa893/mlops_env_sample_ml_base:latest
-  
+commands:
+  install_docker:
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Docker clientのインストール
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
 jobs:
   initial_job:
     executor: dev_executor
@@ -30,8 +42,7 @@ jobs:
     working_directory: ~/sagemaker_mlops_demo/
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
+      - install_docker
       - restore_cache:
           keys: 
             # 保存した最新のキャッシュを拾ってくるのでここでは -{{ epoch }} はいらない
@@ -53,14 +64,6 @@ jobs:
           path: custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps/test-reports
           destination: test-reports
       - run:
-          name: Docker clientのインストール
-          command: |
-            set -x
-            VER="17.03.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
-      - run:
           name: SageMakerAPIイメージのビルド and ECRへpush
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/
@@ -81,6 +84,7 @@ jobs:
     working_directory: ~/sagemaker_mlops_demo/
     steps:
       - checkout
+      - install_docker
       - restore_cache:
           keys: 
             - aws-configure-settings         
@@ -90,12 +94,10 @@ jobs:
             cd /opt/program
             poetry add python-dotenv
       - run:
-          name: generateEndpointでdev環境にSageMakerAPIをデプロイ
+          name: generateEndpointでdev環境にSageMakerAPIをデプロイ（前ジョブでPushしたコンテナイメージを利用）
           command: |
-            cd custom_algorithms/kaggle_titanic/logistic_regression/container/
-            chmod +x build_and_push.sh
-            ./build_and_push.sh
-            cd ../
+            cd custom_algorithms/kaggle_titanic/logistic_regression/
+            aws ecr describe-images --repository-name kaggle-titanic-logistic-regression-api --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' |  sed -e 's/"//g' > image_tag.txt
             python generate_endpoint.py  --env=dev --allow-test
 
 
