@@ -19,7 +19,9 @@ def test_latest_endpoint(env_option):
     from container.api.apps.config_manager import ConfigManager
     config_dir = sd.joinpath('container/api/apps/config_outputs')
     cm = ConfigManager()
-    config = cm.get_newest_filepath(config_dir)
+    config_path = cm.get_newest_filepath(config_dir)
+    no_use = []
+    config = cm.load_config(config_path, no_use)
     aws_profile = config['s3_config']['aws_profile']
 
     # AWS環境の選択
@@ -68,7 +70,7 @@ def test_latest_endpoint(env_option):
     assert isinstance(result_body, dict), 'レスポンス形式が正しくありません'
     expected_label = 'Survived'
     assert expected_label in result_body.keys(), 'レスポンスに目的変数のキーがない'
-    expected_len = len(test_data[expected_label])
+    expected_len = len(test_data['PassengerId'])  # Lengthがわかるkeyであれば何でも良い
     result_len = len(result_body[expected_label])
     assert expected_len == result_len, 'サンプル数に対する推論数が合わない'
 
