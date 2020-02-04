@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+"""
+trainスクリプト
+    SageMakerSDKを経由した学習時のエントリポイント
+    `if __name__ ==  'main':` 以下が学習毎に実行される．
+
+Shebangについて
+    Poetry等の依存関係管理ツールを使う場合は，
+    本番用に作成した（仮想）環境上のPythonインタプリタをShebangに指定する．
+    （仮想環境を構築した場合は固定パスとして指定できるようにしておく）
+
+Ref:
+    https://bit.ly/2QeBc9g
+    https://amzn.to/2O0LK9i
+"""
+
+from __future__ import print_function
+
+from pathlib import Path
+import sys
+import traceback
+
+# local modules
+from apps.config_manager import ConfigManager
+from apps.s3_updown import S3UpDown
+from apps.utils import Utils
+
+sd = Path(__file__).parent.resolve()
+sys.path.append(sd)
+
+
+class Train(object):
+    """
+    TODO:
+        AWS CLI経由で S3 model DLする仕組みを実装
+            trainスクリプト実行によって学習済みモデルをS3から引っ張ってきて
+            /opt/ml/model以下に配置する
+
+            AWS CLIを利用してシンプルに記述したい
+    """
+    def __init__(self):
+        cm = ConfigManager()
+        self.logger = Utils.init_logger('objects_download_from_s3')
+
+        # 推論に必要なオブジェクトは以下のディレクトリに配置(SageMakerの仕様)
+        self.path_dir_dst = Path('/opt/ml/model')
+
+        # S3Upload先情報が保存されている設定の読み込み
+        path_dir_config = sd.joinpath('apps', 'config_outputs')
+        config_path = \
+            cm.get_newest_filepath(path_dir_config, searchmode='filename')
+        expected_keys = ['s3_config']
+        self.config = cm.load_config(config_path, expected_keys)
+
+    def train(self):
+        try:
+            # s3からローカルに保存
+            bucket_name = self.config['s3_config']['bucket_name']
+            s3_src_obj = self.config['s3_config']['path_s3_dst']
+            s3_src_path = f's3://{bucket_name}/{s3_src_obj}'
+            self.logger.info(f'{s3_src_path} から {self.path_dir_dst} へDL')
+            s3ud = S3UpDown(profile=None)
+            s3ud.download(bucket_name, s3_src_obj, self.path_dir_dst)
+            self.logger.info('Download complete!')
+        except Exception as e:
+            # エラー出力
+            self.logger.error('Download failed')
+            trc = traceback.format_exc()
+            output_path = str(Path('/opt/ml/output/failure'))
+            with open(output_path, 'w') as s:
+                s.write('Exception during downloading: ' + str(e) + '\n' + trc)
+            print('Exception during downloading: ' + str(e) + '\n' + trc,
+                  file=sys.stderr)
+            sys.exit(255)
+
+
+if __name__ == '__main__':
+    train = Train()
+    train.train()
+    sys.exit(0)

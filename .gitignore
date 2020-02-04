@@ -1,3 +1,6 @@
+# Source Files
+*.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -102,3 +105,22 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Poetry
+poetry.lock
+
+# VSCode
+devcontainer.env
+
+# Model Artifacts
+*.pkl
+*.pkl.cmp
+model*/
+.model*/
+
+# Others
+image_tag.txt
+
+# Not ignored
+!*valid*.csv
+!*dummy*

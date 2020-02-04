@@ -1,0 +1,3 @@
+[submodule "mlops_env_sample"]
+	path = mlops_env_sample
+	url = git@github.com:ababa893/mlops_env_sample.git
