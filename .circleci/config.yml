@@ -48,11 +48,6 @@ jobs:
             # 保存した最新のキャッシュを拾ってくるのでここでは -{{ epoch }} はいらない
             - aws-configure-settings
       - run:
-          name: coverageレポート作成に必要なパッケージをインストール（tmp）
-          command: |
-            cd /opt/program
-            poetry add pytest-cov coveralls
-      - run:
           name: appsディレクトリ配下の各種スクリプトの単体テスト等を実行し，coverageレポートを作成
           command: |
             cd custom_algorithms/kaggle_titanic/logistic_regression/container/api/apps
@@ -87,12 +82,7 @@ jobs:
       - install_docker
       - restore_cache:
           keys: 
-            - aws-configure-settings         
-      - run:
-          name: python-dotenvのインストールコマンドはtmp処理．後で検証環境のpyproject.tomlに追加
-          command: |
-            cd /opt/program
-            poetry add python-dotenv
+            - aws-configure-settings
       - run:
           name: generateEndpointでdev環境にSageMakerAPIをデプロイ（前ジョブでPushしたコンテナイメージを利用）
           command: |
